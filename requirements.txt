@@ -1,0 +1,12 @@
+# Web Framework
+streamlit>=1.30.0
+
+# Data Manipulation & Analysis
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Scientific Computation / Curve Fitting
+scipy>=1.10.0
+
+# Data Visualization
+altair>=5.0.0
