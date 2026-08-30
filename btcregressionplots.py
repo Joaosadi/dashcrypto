@@ -12,7 +12,7 @@ alt.themes.enable("dark")
 def fit_func(x, p1, p2, p3):
     return p1 + p2 * np.log(x) + p3 * np.log(x) ** 2
 
-fitcut = (60, -3 * 365)
+fitcut = (60, 13 * 365)
 
 # adjusted log regressions chart
 @st.cache_resource
@@ -394,7 +394,7 @@ def plot_log_regression_rainbow_btc(data_raw):
 
 
 # log regression difference
-
+@st.cache_resource
 def plot_log_regression_btc_diff(data_raw):
     data = data_raw.copy(deep=True)
 

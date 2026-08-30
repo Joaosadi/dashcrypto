@@ -4,20 +4,93 @@ import streamlit as st
 
 import btcregressionplots as btcplot
 import btcreturns as btcr
+import btcvolatilityplots as btcvol
 
 database = "crypto_historical_data.db"
 st.set_page_config(page_title="DashCrypto", layout="wide")
 
 
+# 2. Custom CSS for Title Banner, Card Styling, and Footer
+st.markdown(
+    """
+    <style>
+    /* Global Container Padding */
+    .block-container {
+        padding-top: 1.5rem;
+        padding-bottom: 3rem;
+    }
+    
+    /* Header Banner Styling */
+    .title-banner {
+        background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);
+        padding: 24px 32px;
+        border-radius: 12px;
+        color: #ffffff;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+        margin-bottom: 24px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .title-banner h1 {
+        margin: 0;
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: #ffffff;
+    }
+    .title-banner p {
+        margin: 6px 0 0 0;
+        font-size: 1rem;
+        color: #c7d2fe;
+    }
+
+    /* Footer Styling */
+    .custom-footer {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        background-color: #0e1117;
+        color: #888888;
+        text-align: center;
+        padding: 8px 0;
+        font-size: 0.85rem;
+        border-top: 1px solid #222222;
+        z-index: 999;
+    }
+    .custom-footer a {
+        color: #8b5cf6;
+        text-decoration: none;
+        font-weight: 600;
+    }
+    .custom-footer a:hover {
+        text-decoration: underline;
+    }
+    </style>
+""",
+    unsafe_allow_html=True,
+)
+
+# 3. Header Title Banner
+st.markdown(
+    """
+    <div class="title-banner">
+        <h1>Crypto Market Quantitative Dashboard</h1>
+        <p>Technical indicators, Models, and Statistical analysis.</p>
+    </div>
+""",
+    unsafe_allow_html=True,
+)
+
+
+
 @st.cache_data
 def load_crypto_data():
     with sqlite3.connect(database) as conn:
-        df = pd.read_sql("SELECT time_close, close FROM btc_price", conn)
+        df = pd.read_sql("SELECT time_close, close, high, low FROM btc_price", conn)
     return df
 
 df = load_crypto_data()
 
-tab1, tab2 = st.tabs(["BTC metrics", "Stablecoins"])
+tab1, tab2 = st.tabs(["BTC price metrics", "Stablecoins"])
 
 with tab1:
 
@@ -56,3 +129,26 @@ with tab1:
     # volatility
 
     st.header("Volatility metrics")
+    
+    col1, col2 = st.columns(2)
+
+    with col1:
+        fig = btcvol.plot_btc_volatility(df)
+        st.altair_chart(fig, use_container_width=True)
+
+    with col2:
+        fig = btcvol.plot_rvi(df)
+        st.altair_chart(fig, use_container_width=True)
+
+    fig = btcvol.plot_btc_volatility_bands(df)
+    st.altair_chart(fig, use_container_width=True)
+    
+# Custom Footer
+st.markdown(
+    """
+    <div class="custom-footer">
+        <span>Analytics Dashboard • Built with Streamlit & Altair • Updated 2026</span>
+    </div>
+""",
+    unsafe_allow_html=True,
+)
