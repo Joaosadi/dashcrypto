@@ -74,7 +74,7 @@ st.markdown(
     """
     <div class="title-banner">
         <h1>Crypto Market Quantitative Dashboard</h1>
-        <p>Technical indicators, Models, and Statistical analysis.</p>
+        <p>Technical indicators, Models, and Statistical Analysis</p>
     </div>
 """,
     unsafe_allow_html=True,
