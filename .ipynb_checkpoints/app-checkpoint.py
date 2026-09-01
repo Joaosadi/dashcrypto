@@ -81,6 +81,73 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+# daily snapshot metrics
+
+# --- CUSTOM CSS FOR PROFESSIONAL KPI CARDS ---
+st.markdown(
+    """
+    <style>
+    .metric-container {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    .metric-card {
+        background: #131722;
+        border: 1px solid #2a2e39;
+        border-radius: 10px;
+        padding: 16px 20px;
+        flex: 1;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .metric-card:hover {
+        border-color: #434651;
+        transform: translateY(-2px);
+    }
+    .metric-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+    .metric-title {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #848e9c;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .metric-badge {
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+    .badge-positive {
+        background-color: rgba(14, 203, 129, 0.15);
+        color: #0ecb81;
+    }
+    .badge-negative {
+        background-color: rgba(246, 70, 93, 0.15);
+        color: #f6465d;
+    }
+    .metric-value {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: #ffffff;
+        margin: 0;
+        letter-spacing: -0.5px;
+    }
+    .metric-sub {
+        font-size: 0.75rem;
+        color: #5e6673;
+        margin-top: 4px;
+    }
+    </style>
+""",
+    unsafe_allow_html=True,
+)
 
 tab1, tab2 = st.tabs(["BTC price metrics", "Stablecoins"])
 

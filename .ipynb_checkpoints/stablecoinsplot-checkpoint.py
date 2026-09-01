@@ -84,7 +84,7 @@ def plot_stablecoins_market_dominance(df, nstables = 5):
             title=f"Top {nstables} Stablecoins by Circulating Supply",
             width=600,
             height=600,
-            background="transparent",
+            background="#0e1117",
         )
         .configure_title(color="white")
         .configure_legend(labelColor="white", titleColor="white")
@@ -236,7 +236,7 @@ def plot_stablecoin_historical_circulating(prepared_data, normalize=False):
             title=chart_title,
             width="container",
             height=600,
-            background="transparent",
+            background="#0e1117",
         )
         .configure_title(color="#FFFFFF", fontSize=18)
         .configure_view(strokeWidth=0)
