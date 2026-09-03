@@ -3,7 +3,7 @@ import sqlite3
 import pandas as pd
 import requests
 
-BINANCE_KLINES_URL = "https://api.binance.us/api/v3/klines"
+BINANCE_KLINES_URL = "https://api3.binance.com/api/v3/klines"
 DATABASE = "crypto_historical_data.db"
 
 def get_latest_db_timestamp():
