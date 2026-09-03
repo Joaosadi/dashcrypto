@@ -6,149 +6,86 @@ import btcregressionplots as btcplot
 import btcreturns as btcr
 import btcvolatilityplots as btcvol
 import stablecoinsplot as stbl
+import metrics as mt
 
 database = "crypto_historical_data.db"
+
+#function to load style.css
+def load_css(file_path="style.css"):
+    with open(file_path, "r") as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+load_css()
+
 st.set_page_config(page_title="DashCrypto", layout="wide")
 
-
-# 2. Custom CSS for Title Banner, Card Styling, and Footer
-st.markdown(
-    """
-    <style>
-    /* Global Container Padding */
-    .block-container {
-        padding-top: 1.5rem;
-        padding-bottom: 3rem;
-    }
-    
-    /* Header Banner Styling */
-    .title-banner {
-        background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);
-        padding: 24px 32px;
-        border-radius: 12px;
-        color: #ffffff;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-        margin-bottom: 24px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    .title-banner h1 {
-        margin: 0;
-        font-size: 2.2rem;
-        font-weight: 700;
-        color: #ffffff;
-    }
-    .title-banner p {
-        margin: 6px 0 0 0;
-        font-size: 1rem;
-        color: #c7d2fe;
-    }
-
-    /* Footer Styling */
-    .custom-footer {
-        position: fixed;
-        left: 0;
-        bottom: 0;
-        width: 100%;
-        background-color: #0e1117;
-        color: #888888;
-        text-align: center;
-        padding: 8px 0;
-        font-size: 0.85rem;
-        border-top: 1px solid #222222;
-        z-index: 999;
-    }
-    .custom-footer a {
-        color: #8b5cf6;
-        text-decoration: none;
-        font-weight: 600;
-    }
-    .custom-footer a:hover {
-        text-decoration: underline;
-    }
-    </style>
-""",
-    unsafe_allow_html=True,
-)
-
-# 3. Header Title Banner
+#Header Title Banner
 st.markdown(
     """
     <div class="title-banner">
         <h1>Crypto Market Quantitative Dashboard</h1>
         <p>Technical indicators, Models, and Statistical Analysis</p>
     </div>
-""",
+    """,
     unsafe_allow_html=True,
 )
 
-# daily snapshot metrics
+# snapshot metrics
+marketsnap = mt.get_snapshot()
+macro_data = mt.fetch_global_market_metrics()
 
-# --- CUSTOM CSS FOR PROFESSIONAL KPI CARDS ---
-st.markdown(
-    """
-    <style>
-    .metric-container {
-        display: flex;
-        gap: 16px;
-        margin-bottom: 24px;
-    }
-    .metric-card {
-        background: #131722;
-        border: 1px solid #2a2e39;
-        border-radius: 10px;
-        padding: 16px 20px;
-        flex: 1;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        transition: transform 0.2s ease, border-color 0.2s ease;
-    }
-    .metric-card:hover {
-        border-color: #434651;
-        transform: translateY(-2px);
-    }
-    .metric-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 8px;
-    }
-    .metric-title {
-        font-size: 0.85rem;
-        font-weight: 600;
-        color: #848e9c;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    .metric-badge {
-        font-size: 0.75rem;
-        font-weight: 600;
-        padding: 2px 6px;
-        border-radius: 4px;
-    }
-    .badge-positive {
-        background-color: rgba(14, 203, 129, 0.15);
-        color: #0ecb81;
-    }
-    .badge-negative {
-        background-color: rgba(246, 70, 93, 0.15);
-        color: #f6465d;
-    }
-    .metric-value {
-        font-size: 1.6rem;
-        font-weight: 700;
-        color: #ffffff;
-        margin: 0;
-        letter-spacing: -0.5px;
-    }
-    .metric-sub {
-        font-size: 0.75rem;
-        color: #5e6673;
-        margin-top: 4px;
-    }
-    </style>
-""",
-    unsafe_allow_html=True,
-)
+col1, col2, col3, col4, col5, col6 = st.columns(6)
 
+with col1:
+    st.metric(
+        label="Bitcoin",
+        value=f"${marketsnap['bitcoin']['usd']:,.0f}",
+        delta=f"{marketsnap['bitcoin']['usd_24h_change']:.2f}%",
+        delta_color="normal",
+    )
+    
+with col2:
+    st.metric(
+        label="Total Market Cap",
+        value=macro_data["total_mcap"],
+        delta=macro_data["mcap_change"],
+        delta_color="normal",
+    )
+
+with col3:
+    st.metric(
+        label="24h Trading Volume",
+        value=macro_data["total_volume"],
+        delta="Global CEX/DEX",
+        delta_color="off",
+    )
+
+with col4:
+    st.metric(
+        label="Bitcoin Dominance",
+        value=macro_data["btc_dominance"],
+        delta="BTC Share of Total Cap",
+        delta_color="off",
+    )
+    
+with col5:
+    st.metric(
+        label="USDT",
+        value=f"${marketsnap['tether']['usd']:.4f}",
+        delta=f"{marketsnap['tether']['usd_24h_change']:.2f}%",
+        delta_color="normal",
+    )
+
+with col6:
+    st.metric(
+        label="USDC",
+        value=f"${marketsnap['usd-coin']['usd']:.4f}",
+        delta=f"{marketsnap['usd-coin']['usd_24h_change']:.2f}%",
+        delta_color="normal",
+    )
+
+
+
+# tabs
 tab1, tab2 = st.tabs(["BTC price metrics", "Stablecoins"])
 
 with tab1:
@@ -230,6 +167,7 @@ with tab1:
             nstables = st.slider("Number of stablecoins", min_value=3, max_value = 10, value=5, step=1)
             fig = stbl.plot_stablecoins_market_dominance(df, nstables = nstables)
             st.altair_chart(fig, use_container_width=True)
+    
 # Custom Footer
 st.markdown(
     """
