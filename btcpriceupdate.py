@@ -3,83 +3,92 @@ import sqlite3
 import pandas as pd
 import requests
 
-BINANCE_KLINES_URL = "https://api3.binance.com/api/v3/klines"
 DATABASE = "crypto_historical_data.db"
 
 def get_latest_db_timestamp():
-    """Fetch the max timestamp (in milliseconds) currently stored in the DB."""
+    """Fetch the max timestamp (in seconds) stored in SQLite to align with Coinbase."""
     with sqlite3.connect(DATABASE) as conn:
         result = pd.read_sql("SELECT MAX(time_close) FROM btc_price", conn)
-    result = result.max().values[0]
-    dt = datetime.fromisoformat(result)
-    ms = int(dt.timestamp() * 1000)
-    return ms
+
+    raw_val = result.iloc[0, 0]
+
+    # Handle empty database
+    if pd.isna(raw_val) or raw_val is None:
+        return None
+
+    # Handle string ISO format or existing integer timestamps
+    if isinstance(raw_val, str):
+        # Convert string to UTC datetime
+        dt = pd.to_datetime(raw_val, utc=True)
+        return int(dt.timestamp())
+    elif isinstance(raw_val, (int, float)):
+        # If stored as milliseconds in DB, convert to seconds
+        return int(raw_val // 1000) if raw_val > 1e11 else int(raw_val)
+
+    return None
 
 
-def fetch_binance_klines(symbol="BTCUSDT", interval="1d", start_time=None):
-    """Fetch candlestick data directly from Binance public REST API."""
-    params = {
-        "symbol": symbol,
-        "interval": interval,
-        "limit": 1000,  # Max allowed per request
-    }
-    if start_time:
-        # +1 ms so we don't duplicate the last existing candle
-        params["startTime"] = start_time + 1
+def fetch_btc_daily_coinbase(start_time_sec=None):
+    """Fetch daily BTC candles from Coinbase starting from the latest DB timestamp."""
+    url = "https://api.exchange.coinbase.com/products/BTC-USD/candles"
 
-    response = requests.get(BINANCE_KLINES_URL, params=params)
-    response.raise_for_status()
-    data = response.json()
+    # Granularity 86400 = 1 Day
+    params = {"granularity": 86400}
 
-    if not data:
-        return pd.DataFrame()
+    # Pass ISO 8601 start date if we already have records in DB
+    if start_time_sec:
+        start_iso = datetime.fromtimestamp(start_time_sec, tz=timezone.utc).isoformat()
+        params["start"] = start_iso
 
-    # Parse Binance KLine Array Structure
-    cols = [
-        "timestamp",
-        "open",
-        "high",
-        "low",
-        "close",
-        "volume",
-        "close_time",
-        "quote_asset_volume",
-        "number_of_trades",
-        "taker_buy_base_asset_volume",
-        "taker_buy_quote_asset_volume",
-        "ignore",
-    ]
+    headers = {"User-Agent": "CryptoDashboard/1.0"}
 
-    df = pd.DataFrame(data, columns=cols)
+    try:
+        response = requests.get(url, params=params, headers=headers, timeout=10)
+        response.raise_for_status()
+        data = response.json()
 
-    # Clean & Format Columns
-    df["symbol"] = symbol
-    df = df[["timestamp", "symbol", "open", "high", "low", "close", "volume"]]
-    numeric_cols = ["open", "high", "low", "close", "volume"]
-    df[numeric_cols] = df[numeric_cols].apply(pd.to_numeric)
-
-    return df
-
-def update_btc_database(db_path=DATABASE):
-    """Main function to perform delta update."""
-    with sqlite3.connect(db_path) as conn:
-        last_ts = get_latest_db_timestamp()
-        new_candles = fetch_binance_klines(
-            symbol="BTCUSDT", interval="1d", start_time=last_ts
-        )
-
-        if new_candles.empty:
+        if not data:
             return pd.DataFrame()
 
-        # Insert new rows into database
-        new_candles = new_candles.rename(columns={"timestamp": "time_close"})
-        new_candles['time_close'] = pd.to_datetime(new_candles['time_close'], unit='ms', utc=True)
-        new_candles = new_candles[["time_close", "close", "high", "low", "open"]]
-        new_candles.to_sql("btc_price", conn, if_exists="append", index=False)
-    
-    return new_candles
+        # Coinbase returns: [time, low, high, open, close, volume]
+        cols = ["time_close", "low", "high", "open", "close", "volume"]
+        df = pd.DataFrame(data, columns=cols)
+
+        # Convert Unix epoch (seconds) to UTC ISO string format for SQLite
+        df["time_close"] = pd.to_datetime(
+            df["time_close"], unit="s", utc=True
+        ).dt.strftime("%Y-%m-%d %H:%M:%S")
+
+        # Sort ascending by timestamp
+        df = df.sort_values("time_close").reset_index(drop=True)
+
+        # Filter out the existing max record if it returned in the API response
+        if start_time_sec:
+            last_date_str = datetime.fromtimestamp(
+                start_time_sec, tz=timezone.utc
+            ).strftime("%Y-%m-%d %H:%M:%S")
+            df = df[df["time_close"] > last_date_str].reset_index(drop=True)
+
+        return df
+
+    except Exception as e:
+        print(f"Failed to fetch data from Coinbase: {e}")
+        return pd.DataFrame()
+
+
+# --- USAGE / EXECUTION FLOW ---
+def sync_latest_btc_data():
+    latest_sec = get_latest_db_timestamp()
+    new_data = fetch_btc_daily_coinbase(start_time_sec=latest_sec).drop("volume", axis = 1)
+
+    if not new_data.empty:
+        with sqlite3.connect(DATABASE) as conn:
+            new_data.to_sql(
+                "btc_price", conn, if_exists="append", index=False
+            )
+        print(f"Successfully appended {len(new_data)} new candle(s).")
+    else:
+        print("Database is already up to date.")
 
 if __name__ == "__main__":
-    print("Starting automated Binance sync...")
-    df = update_btc_database("crypto.db")
-    print(df)
+    sync_latest_btc_data()
