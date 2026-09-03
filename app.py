@@ -97,7 +97,7 @@ with tab1:
         return df
     
     df = load_crypto_data()
-    df["time_close"] = pd.to_datetime(df["time_close"], utc=True)
+    df["time_close"] = pd.to_datetime(df["time_close"], utc=True, format='mixed')
 
     st.header("Price regression metrics")
     fig = btcplot.generate_plot_log_regression(df)
