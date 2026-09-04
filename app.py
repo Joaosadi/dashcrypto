@@ -165,9 +165,12 @@ with tab1:
             st.altair_chart(fig, use_container_width=True,theme=None)
         
         with col2:
-            nstables = st.slider("Number of stablecoins", min_value=3, max_value = 10, value=5, step=1)
-            fig = stbl.plot_stablecoins_market_dominance(df, nstables = nstables)
+            # nstables = st.slider("Number of stablecoins", min_value=3, max_value = 10, value=5, step=1)
+            fig = stbl.plot_stablecoins_market_dominance(df, nstables = 5)
             st.altair_chart(fig, use_container_width=True)
+
+        fig = stbl.plot_stablecoin_price_histograms(prepared_data, symbol = "USDT")
+        st.altair_chart(fig, use_container_width=True)
     
 # Custom Footer
 st.markdown(
