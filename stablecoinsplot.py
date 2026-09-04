@@ -3,6 +3,7 @@ import streamlit as st
 import pandas as pd
 import altair as alt
 import time
+import numpy as np
 
 @st.cache_data
 def get_stablecoin_circulating_data():
@@ -20,7 +21,7 @@ def get_stablecoin_circulating_data():
 
 
 @st.cache_resource
-def plot_stablecoins_market_dominance(df, nstables = 5):
+def plot_stablecoins_market_dominance(df, nstables = 6):
     # 1. Sort dataframe by circulating supply descending
     df_sorted = df.sort_values("circulating", ascending=False)
     
@@ -44,6 +45,7 @@ def plot_stablecoins_market_dominance(df, nstables = 5):
         "#FF00AA", # Color 3
         "#FFAA00", # Color 4
         "#AA00FF", # Color 5
+        "#AAA0AF",
         "#555555"  # Others (usually greyed out in dark themes)
     ]
 
@@ -117,7 +119,7 @@ def get_stablecoin_historical_data(id="1"):
     return df
 
 @st.cache_data
-def prepare_top_stablecoin_data(df, nstables = 5):
+def prepare_top_stablecoin_data(df, nstables = 6):
     df_sorted = df.sort_values("circulating", ascending = False)
     ids = df_sorted["id"].head(nstables)
     series_dict = dict()
@@ -187,7 +189,7 @@ def plot_stablecoin_historical_circulating(prepared_data, normalize=False):
         "DAI": "#FF00AA",
         "USDS": "#FFAA00",
         "USD1": "#AA00FF",
-        "USDe": "#E100FF",
+        "USDe": "#E1A0FF",
         "PYUSD": "#00E5FF",
         "Others": "#6E7681",
     }
@@ -289,40 +291,67 @@ def plot_stablecoin_historical_circulating(prepared_data, normalize=False):
 
     return chart
 
+
+# stable coin histograms
+
+# stablecoin historical prices
+@st.cache_data
+def get_stablecoin_prices():
+    url = "https://stablecoins.llama.fi/stablecoinprices"
+    response = requests.get(url)
+    data = response.json()
+    df_list = []
+    for d in data:
+        date = d["date"]
+        coins = pd.DataFrame(list(d["prices"].items()), columns = ["stablecoin", "price"])
+        # print(d["prices"])
+        coins["date"] = date
+        df_list.append(coins)
+    df = pd.concat(df_list)
+    df["date"] = pd.to_datetime(df["date"], unit="s")
+    df = df[df["date"] != "1970-01-01"]
+    return df
+
 @st.cache_resource
-def plot_stablecoin_price_histograms(price_df, symbol = "USDT"):
-    """Generates price distribution histograms for individual stablecoins.
+def plot_stablecoin_price_histograms(price_df, symbol="usdt"):
+    # Case-insensitive filtering
+    token_df = price_df[
+        price_df["stablecoin"].str.lower() == symbol.lower()
+    ].copy()
 
-    Expects `price_df` with columns: ['date', 'symbol', 'price']
-    """
-    color_map = {
-        "USDT": "#00FFAA",
-        "USDC": "#00AAFF",
-        "DAI": "#FF00AA",
-        "USDS": "#FFAA00",
-        "USD1": "#AA00FF",
-        "USDE": "#E100FF",
-        "PYUSD": "#00E5FF",
-        "Others": "#6E7681",
-    }
+    if token_df.empty:
+        # Fallback if symbol isn't found
+        token_df = price_df[
+            price_df["stablecoin"].str.contains(symbol, case=False, na=False)
+        ].copy()
 
-    token_df = price_df[price_df["symbol"] == symbol].copy()
-    color = color_map.get(symbol, "#00AAFF")
+    # 1. Pre-calculate histogram bins in Pandas to prevent sub-segment stacking
+    counts, bin_edges = np.histogram(token_df["price"].dropna(), bins=40)
 
-    # Histogram Bars
+    binned_df = pd.DataFrame(
+        {
+            "bin_start": bin_edges[:-1],
+            "bin_end": bin_edges[1:],
+            "bin_center": (bin_edges[:-1] + bin_edges[1:]) / 2,
+            "count": counts,
+        }
+    )
+
+    color = "#A01236"
+
+    # 2. Plot pre-aggregated bins as clean, single bars
     bars = (
-        alt.Chart(token_df)
+        alt.Chart(binned_df)
         .mark_bar(
-            opacity=0.75,
             color=color,
-            cornerRadiusTopLeft=2,
-            cornerRadiusTopRight=2,
+            opacity=0.85,
+            cornerRadiusTopLeft=3,
+            cornerRadiusTopRight=3,
         )
         .encode(
             x=alt.X(
-                "price:Q",
+                "bin_center:Q",
                 title="Price (USD)",
-                bin=alt.BinParams(maxbins=40),
                 axis=alt.Axis(
                     format="$.3f",
                     gridColor="#22272E",
@@ -332,7 +361,7 @@ def plot_stablecoin_price_histograms(price_df, symbol = "USDT"):
                 ),
             ),
             y=alt.Y(
-                "count():Q",
+                "count:Q",
                 title="Frequency (Days)",
                 axis=alt.Axis(
                     gridColor="#22272E",
@@ -342,35 +371,33 @@ def plot_stablecoin_price_histograms(price_df, symbol = "USDT"):
                 ),
             ),
             tooltip=[
-                alt.Tooltip("price:Q", title="Price Bin", format="$.4f"),
-                alt.Tooltip("count():Q", title="Days Count"),
+                alt.Tooltip("bin_start:Q", title="Bin Start", format="$.4f"),
+                alt.Tooltip("bin_end:Q", title="Bin End", format="$.4f"),
+                alt.Tooltip("count:Q", title="Days Count"),
             ],
         )
     )
 
-    # # $1.00 Peg Baseline Reference Line
-    # peg_line = (
-    #     alt.Chart(pd.DataFrame([{"peg": 1.00}]))
-    #     .mark_rule(color="#F6465D", strokeDash=[4, 4], strokeWidth=1.5)
-    #     .encode(x="peg:Q")
-    # )
+    # $1.00 Peg Baseline Reference Line
+    peg_line = (
+        alt.Chart(pd.DataFrame([{"peg": 1.00}]))
+        .mark_rule(color="#F6465D", strokeDash=[4, 4], strokeWidth=2)
+        .encode(x="peg:Q")
+    )
 
-    # # Combine sub-chart (NO .configure_* calls here!)
-    # sub_chart = (bars + peg_line).properties(
-    #     title=f"{symbol} Price Distribution",
-    #     width=600,
-    #     height=300,
-    # )
+    # Combine chart
+    chart = (
+        (bars + peg_line)
+        .properties(
+            title=f"{symbol.upper()} Price Distribution",
+            width=600,
+            height=300,
+        )
+        .configure_title(
+            anchor="middle",
+            color="#FFFFFF",
+            fontSize=18,
+        )
+    )
 
-    # charts.append(sub_chart)
-
-    # # Apply global styling once on the top-level concatenated chart
-    # final_grid = (
-    #     alt.vconcat(*rows)
-    #     .properties(background="#0E1117")
-    #     .configure_title(color="#FFFFFF", fontSize=14, anchor="start")
-    #     .configure_view(strokeWidth=0)
-    #     .configure_legend(labelColor="#FFFFFF", titleColor="#FFFFFF")
-    # )
-
-    return bars
+    return chart

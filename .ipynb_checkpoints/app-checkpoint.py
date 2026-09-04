@@ -151,9 +151,13 @@ with tab1:
 
 # stablecoins tabs
 
+    
     with tab2:
         df = stbl.get_stablecoin_circulating_data()
         prepared_data = stbl.prepare_top_stablecoin_data(df)
+
+        st.header("Market Dominance")
+        
         col1, col2 = st.columns(2)
 
         with col1:
@@ -166,11 +170,22 @@ with tab1:
         
         with col2:
             # nstables = st.slider("Number of stablecoins", min_value=3, max_value = 10, value=5, step=1)
-            fig = stbl.plot_stablecoins_market_dominance(df, nstables = 5)
+            fig = stbl.plot_stablecoins_market_dominance(df, nstables = 6)
             st.altair_chart(fig, use_container_width=True)
 
-        fig = stbl.plot_stablecoin_price_histograms(prepared_data, symbol = "USDT")
-        st.altair_chart(fig, use_container_width=True)
+        st.header("Price Histograms x Peg")
+        
+        cols1 = st.columns(3)
+        cols2 = st.columns(3)
+        cols = cols1 + cols2
+        stablenames = ["usd-coin", "dai", "tether", "usds", "usd1-wlfi", 'ethena-usde']
+
+        stablecoinprices = stbl.get_stablecoin_prices()
+
+        for symbol, col in zip(stablenames, cols):
+            with col:
+                fig = stbl.plot_stablecoin_price_histograms(stablecoinprices, symbol = symbol)
+                st.altair_chart(fig, use_container_width=True)
     
 # Custom Footer
 st.markdown(
