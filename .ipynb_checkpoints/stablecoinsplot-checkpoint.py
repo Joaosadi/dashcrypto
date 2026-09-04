@@ -19,6 +19,11 @@ def get_stablecoin_circulating_data():
     df = pd.DataFrame(dict_list)
     return df
 
+def get_tether_dominance(df):
+    totalcap = df["circulating"].sum()
+    thetercap = df[df["symbol"] == "USDT"]["circulating"].values[0]
+    return thetercap/totalcap
+
 
 @st.cache_resource
 def plot_stablecoins_market_dominance(df, nstables = 6):
@@ -400,4 +405,118 @@ def plot_stablecoin_price_histograms(price_df, symbol="usdt"):
         )
     )
 
+    return chart
+
+
+# stablecoin per chain and metrics
+@st.cache_data
+def get_stablecoinchains():
+
+    """ Returns a dataframe with chain, circulating columns"""
+    url = "https://stablecoins.llama.fi/stablecoinchains"
+    r = requests.get(url).json()
+    dictlist = []
+    for d in r:
+        name = d["name"]
+        # print(d["totalCirculatingUSD"])
+        try:
+            circulating = d["totalCirculatingUSD"]["peggedUSD"]
+        except: 
+            circulating = 0
+        dictlist.append({"chain": name, "circulating": circulating})
+    df = pd.DataFrame(dictlist)
+    return df
+
+def get_stablecoin_marketcap(df):
+    return df["circulating"].sum()
+
+
+def get_ethereum_stablecoin_dominance(df):
+    return df[df["chain"] == "Ethereum"]["circulating"].values[0]/get_stablecoin_marketcap(df)
+
+
+@st.cache_resource
+def plot_chain_stablecoin_dominance(df):
+    # 1. Sort and group chains outside top 4 into 'Others'
+    top_n = 5
+    df_sorted = df.sort_values(by="circulating", ascending=False).reset_index(
+        drop=True
+    )
+    
+    top_chains = df_sorted.iloc[:top_n].copy()
+    others_value = df_sorted.iloc[top_n:]["circulating"].sum()
+    
+    if others_value > 0:
+        others_df = pd.DataFrame(
+            [{"chain": "Others", "circulating": others_value}]
+        )
+        df_grouped = pd.concat([top_chains, others_df], ignore_index=True)
+    else:
+        df_grouped = top_chains
+    
+    # 2. Calculate percentage share
+    total_circulating = df_grouped["circulating"].sum()
+    df_grouped["pct"] = df_grouped["circulating"] / total_circulating
+    
+    # 3. Define custom color mappings (including a specific color for 'Others')
+    domain = list(df_grouped["chain"])
+    color_palette = {
+        "Ethereum": "#627EEA",
+        "Tron": "#FF0013",
+        "Solana": "#14F195",
+        "BSC": "#F3BA2F",
+        "Hyperliquid L1": "#00AEE9",
+        "Others": "#6E7681",  # Neutral dark gray for 'Others'
+    }
+    
+    range_colors = [color_palette.get(chain, "#9E9E9E") for chain in domain]
+    
+    # 4. Plot pie/donut chart
+    # 2. Base encoding for both pie arc and text marks
+    base = alt.Chart(df_grouped).encode(
+        theta=alt.Theta("pct:Q", stack=True),
+        color=alt.Color(
+            "chain:N",
+            title="Blockchain",
+            scale=alt.Scale(domain=domain, range=range_colors),
+            legend=alt.Legend(
+                labelColor="#FFFFFF", titleColor="#FFFFFF", orient="right"
+            ),
+            sort=domain,
+        ),
+    )
+    
+    # 3. Donut Arc Layer
+    arcs = base.mark_arc(innerRadius=0, outerRadius=150).encode(
+        tooltip=[
+            alt.Tooltip("chain:N", title="Chain"),
+            alt.Tooltip("pct:Q", title="Share", format=".1%"),
+            alt.Tooltip(
+                "circulating:Q", title="Circulating Supply", format="$,.0f"
+            ),
+        ]
+    )
+    
+    # 4. Text Label Layer inside slices
+    labels = base.mark_text(
+        radius=180,  # Position labels between innerRadius (80) and outerRadius (150)
+        color="white",
+        fontSize=12,
+        fontWeight="bold",
+    ).encode(
+        text=alt.Text("pct:Q", format=".1%")  # Displays formatted percentage (e.g. 58.2%)
+    )
+    
+    # 5. Combine layers
+    chart = (
+        (arcs + labels)
+        .properties(
+            title="Stablecoin Market Share by Chain (%)",
+            width=400,
+            height=500,
+            background="#0E1117",
+        )
+        .configure_title(anchor="middle", color="#FFFFFF", fontSize=16)
+        .configure_view(strokeWidth=0)
+    )
     return chart
