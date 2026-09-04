@@ -151,26 +151,77 @@ with tab1:
 
 # stablecoins tabs
 
+    
     with tab2:
+
+        # load data
+
+                
         df = stbl.get_stablecoin_circulating_data()
         prepared_data = stbl.prepare_top_stablecoin_data(df)
-        col1, col2 = st.columns(2)
 
+        # market metrics
+        stablecoininchains = stbl.get_stablecoinchains()
+        cols = st.columns(3)
+
+        with cols[0]:
+            st.metric(
+                label="Total Stablecoin Marketcap",
+                value=f"${stbl.get_stablecoin_marketcap(stablecoininchains)/1e9:,.1f} B",
+            )
+        with cols[1]:
+            st.metric(
+                label="Ethereum Stablecoin Dominance (% stablecoins in Ethereum)",
+                value=f"{stbl.get_ethereum_stablecoin_dominance(stablecoininchains)*100:.1f} %",
+            )
+
+        with cols[2]:
+            st.metric(
+                label="Tether Market Dominance",
+                value=f"{stbl.get_tether_dominance(df)*100:.1f} %",
+            )
+
+        # plots
+
+
+        st.header("Market Dominance")
+
+        chart_type = st.radio(
+                    label="Display Mode",
+                    options=["Absolute Value ($B)", "Percentage Share (%)"],
+                    horizontal=True,)
+        fig = stbl.plot_stablecoin_historical_circulating(prepared_data, normalize = chart_type == "Percentage Share (%)")
+        st.altair_chart(fig, use_container_width=True,theme=None)
+
+        col1, col2 = st.columns(2)
         with col1:
-            chart_type = st.radio(
-                        label="Display Mode",
-                        options=["Absolute Value ($B)", "Percentage Share (%)"],
-                        horizontal=True,)
-            fig = stbl.plot_stablecoin_historical_circulating(prepared_data, normalize = chart_type == "Percentage Share (%)")
-            st.altair_chart(fig, use_container_width=True,theme=None)
+            fig = stbl.plot_chain_stablecoin_dominance(stablecoininchains)
+            st.altair_chart(fig, use_container_width=True)
         
         with col2:
             # nstables = st.slider("Number of stablecoins", min_value=3, max_value = 10, value=5, step=1)
-            fig = stbl.plot_stablecoins_market_dominance(df, nstables = 5)
+            fig = stbl.plot_stablecoins_market_dominance(df, nstables = 6)
             st.altair_chart(fig, use_container_width=True)
 
-        fig = stbl.plot_stablecoin_price_histograms(prepared_data, symbol = "USDT")
-        st.altair_chart(fig, use_container_width=True)
+
+                # chains dominance
+
+
+        st.header("Price Histograms x Peg")
+        
+        cols1 = st.columns(3)
+        cols2 = st.columns(3)
+        cols = cols1 + cols2
+        stablenames = ["usd-coin", "dai", "tether", "usds", "usd1-wlfi", 'ethena-usde']
+
+        stablecoinprices = stbl.get_stablecoin_prices()
+
+        for symbol, col in zip(stablenames, cols):
+            with col:
+                fig = stbl.plot_stablecoin_price_histograms(stablecoinprices, symbol = symbol)
+                st.altair_chart(fig, use_container_width=True)
+
+
     
 # Custom Footer
 st.markdown(
