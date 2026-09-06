@@ -2,11 +2,11 @@ import sqlite3
 import pandas as pd
 import streamlit as st
 
-import btcregressionplots as btcplot
-import btcreturns as btcr
-import btcvolatilityplots as btcvol
-import stablecoinsplot as stbl
-import metrics as mt
+from plots import btcregressionplots as btcplot
+from plots import btcreturns as btcr
+from plots import btcvolatilityplots as btcvol
+from plots import stablecoinsplot as stbl
+from plots import metrics as mt
 
 database = "crypto_historical_data.db"
 

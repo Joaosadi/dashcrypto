@@ -1,4 +1,4 @@
-name: Daily Binance BTC Sync
+name: Daily Coinbase BTC Sync
 
 on:
   schedule:
