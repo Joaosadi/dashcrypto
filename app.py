@@ -7,6 +7,7 @@ from plots import btcreturns as btcr
 from plots import btcvolatilityplots as btcvol
 from plots import stablecoinsplot as stbl
 from plots import metrics as mt
+from plots import macroplots as macrop
 
 database = "crypto_historical_data.db"
 
@@ -86,18 +87,19 @@ with col6:
 
 
 # tabs
-tab1, tab2 = st.tabs(["BTC price metrics", "Stablecoins"])
+tab1, tab2, tab3 = st.tabs(["BTC price metrics", "Stablecoins", "Macro vs BTC"])
+
+@st.cache_data
+def load_crypto_data():
+    with sqlite3.connect(database) as conn:
+        price_df = pd.read_sql("SELECT time_close, close, high, low FROM btc_price", conn)
+    return price_df
+
+df = load_crypto_data()
+df["time_close"] = pd.to_datetime(df["time_close"], utc=True, format='mixed')
+btc_price_df = df
 
 with tab1:
-
-    @st.cache_data
-    def load_crypto_data():
-        with sqlite3.connect(database) as conn:
-            df = pd.read_sql("SELECT time_close, close, high, low FROM btc_price", conn)
-        return df
-    
-    df = load_crypto_data()
-    df["time_close"] = pd.to_datetime(df["time_close"], utc=True, format='mixed')
 
     st.header("Price regression metrics")
     fig = btcplot.generate_plot_log_regression(df)
@@ -149,10 +151,7 @@ with tab1:
     st.altair_chart(fig, use_container_width=True)
 
 
-# stablecoins tabs
-
-    
-    with tab2:
+with tab2:
 
         # load data
 
@@ -222,7 +221,46 @@ with tab1:
                 st.altair_chart(fig, use_container_width=True)
 
 
-    
+with tab3:
+    st.header("Macro indicators vs Bitcoin")
+
+    try:
+        macro_df = macrop.fetch_fred_macro_data(start_date="2006-01-01")
+        merged_macro = macrop.merge_macro_btc(macro_df, btc_price_df)
+    except Exception as exc:
+        st.error(f"Could not load FRED macro data: {exc}")
+        merged_macro = None
+
+    if merged_macro is not None:
+        col1, col2 = st.columns(2)
+        with col1:
+            st.altair_chart(
+                macrop.plot_macro_vs_btc(merged_macro, "dxy"),
+                use_container_width=True,
+                theme=None,
+            )
+        with col2:
+            st.altair_chart(
+                macrop.plot_macro_vs_btc(merged_macro, "us_10y_yield"),
+                use_container_width=True,
+                theme=None,
+            )
+
+        col3, col4 = st.columns(2)
+        with col3:
+            st.altair_chart(
+                macrop.plot_macro_vs_btc(merged_macro, "fed_balance_sheet"),
+                use_container_width=True,
+                theme=None,
+            )
+        with col4:
+            st.altair_chart(
+                macrop.plot_macro_vs_btc(merged_macro, "yield_curve_slope"),
+                use_container_width=True,
+                theme=None,
+            )
+
+
 # Custom Footer
 st.markdown(
     """
