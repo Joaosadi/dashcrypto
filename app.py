@@ -7,6 +7,7 @@ from plots import btcreturns as btcr
 from plots import btcvolatilityplots as btcvol
 from plots import stablecoinsplot as stbl
 from plots import metrics as mt
+from plots import macroplots as macrop
 
 database = "crypto_historical_data.db"
 
@@ -86,18 +87,19 @@ with col6:
 
 
 # tabs
-tab1, tab2 = st.tabs(["BTC price metrics", "Stablecoins"])
+tab1, tab2, tab3 = st.tabs(["BTC price metrics", "Stablecoins", "Macro Metrics"])
+
+@st.cache_data
+def load_crypto_data():
+    with sqlite3.connect(database) as conn:
+        price_df = pd.read_sql("SELECT time_close, close, high, low FROM btc_price", conn)
+    return price_df
+
+df = load_crypto_data()
+df["time_close"] = pd.to_datetime(df["time_close"], utc=True, format='mixed')
+btc_price_df = df
 
 with tab1:
-
-    @st.cache_data
-    def load_crypto_data():
-        with sqlite3.connect(database) as conn:
-            df = pd.read_sql("SELECT time_close, close, high, low FROM btc_price", conn)
-        return df
-    
-    df = load_crypto_data()
-    df["time_close"] = pd.to_datetime(df["time_close"], utc=True, format='mixed')
 
     st.header("Price regression metrics")
     fig = btcplot.generate_plot_log_regression(df)
@@ -149,10 +151,7 @@ with tab1:
     st.altair_chart(fig, use_container_width=True)
 
 
-# stablecoins tabs
-
-    
-    with tab2:
+with tab2:
 
         # load data
 
@@ -222,7 +221,33 @@ with tab1:
                 st.altair_chart(fig, use_container_width=True)
 
 
-    
+with tab3:
+    st.header("Macro Indicators vs Bitcoin Price")
+
+    # load fed data
+    macro = macrop.fetch_fred_macro_data(start_date="2006-01-01", end_date=None)
+    merged = macrop.merge_btc_with_macro(btc_price_df, macro)
+
+    # Resample to weekly for cleaner charts
+    weekly = merged.resample("W").agg({
+        "dxy": "last",
+        "us_10y_yield": "last",
+        "fed_balance_sheet": "last",
+        "yield_curve_slope": "last",
+        "btc_close": "last",
+    }).dropna()
+
+    charts = macrop.create_all_indicator_charts(weekly)
+    items = list(charts.items())
+    for i in range(0, len(items), 2):
+        row = st.columns(2)
+        for j in range(2):
+            if i + j < len(items):
+                with row[j]:
+                    st.altair_chart(items[i + j][1], use_container_width=True)
+
+
+
 # Custom Footer
 st.markdown(
     """
