@@ -87,7 +87,7 @@ with col6:
 
 
 # tabs
-tab1, tab2, tab3 = st.tabs(["BTC price metrics", "Stablecoins", "Macro vs BTC"])
+tab1, tab2, tab3 = st.tabs(["BTC price metrics", "Stablecoins", "Macro Metrics"])
 
 @st.cache_data
 def load_crypto_data():
@@ -222,43 +222,30 @@ with tab2:
 
 
 with tab3:
-    st.header("Macro indicators vs Bitcoin")
+    st.header("Macro Indicators vs Bitcoin Price")
 
-    try:
-        macro_df = macrop.fetch_fred_macro_data(start_date="2006-01-01")
-        merged_macro = macrop.merge_macro_btc(macro_df, btc_price_df)
-    except Exception as exc:
-        st.error(f"Could not load FRED macro data: {exc}")
-        merged_macro = None
+    # load fed data
+    macro = macrop.fetch_fred_macro_data(start_date="2006-01-01", end_date=None)
+    merged = macrop.merge_btc_with_macro(btc_price_df, macro)
 
-    if merged_macro is not None:
-        col1, col2 = st.columns(2)
-        with col1:
-            st.altair_chart(
-                macrop.plot_macro_vs_btc(merged_macro, "dxy"),
-                use_container_width=True,
-                theme=None,
-            )
-        with col2:
-            st.altair_chart(
-                macrop.plot_macro_vs_btc(merged_macro, "us_10y_yield"),
-                use_container_width=True,
-                theme=None,
-            )
+    # Resample to weekly for cleaner charts
+    weekly = merged.resample("W").agg({
+        "dxy": "last",
+        "us_10y_yield": "last",
+        "fed_balance_sheet": "last",
+        "yield_curve_slope": "last",
+        "btc_close": "last",
+    }).dropna()
 
-        col3, col4 = st.columns(2)
-        with col3:
-            st.altair_chart(
-                macrop.plot_macro_vs_btc(merged_macro, "fed_balance_sheet"),
-                use_container_width=True,
-                theme=None,
-            )
-        with col4:
-            st.altair_chart(
-                macrop.plot_macro_vs_btc(merged_macro, "yield_curve_slope"),
-                use_container_width=True,
-                theme=None,
-            )
+    charts = macrop.create_all_indicator_charts(weekly)
+    items = list(charts.items())
+    for i in range(0, len(items), 2):
+        row = st.columns(2)
+        for j in range(2):
+            if i + j < len(items):
+                with row[j]:
+                    st.altair_chart(items[i + j][1], use_container_width=True)
+
 
 
 # Custom Footer

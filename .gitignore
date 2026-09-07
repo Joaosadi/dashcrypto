@@ -1,1 +1,16 @@
 .env
+.obsidian/
+.agents/
+.claude/
+.copilot/
+.devcontainer/
+.opencode/
+.smart-env/
+.smtcmp_json_db/
+copilot/
+.smtcmp_vector_db.tar.gz
+
+
+
+# Ignore Smart Environment folder
+.smart-env

@@ -10,3 +10,9 @@ scipy>=1.10.0
 
 # Data Visualization
 altair>=5.0.0
+
+# HTTP Requests (CoinGecko, DeFiLlama APIs)
+requests>=2.28.0
+
+# Federal Reserve Data (FRED)
+pandas-datareader>=0.10.0
