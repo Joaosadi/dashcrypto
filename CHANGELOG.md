@@ -3,6 +3,7 @@
 ### ⚙️ Miscellaneous Tasks
 
 - Stop tracking pyc and jupyter checkpoint artifacts
+- Track devcontainer config (remove it from gitignore)
 
 ### 💼 Other
 
