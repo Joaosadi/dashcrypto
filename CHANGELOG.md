@@ -8,6 +8,7 @@
 
 - Restyle stablecoin supply chart to match market share chart
 - Match macro metrics charts to BTC tab styling
+- Move macro chart legends to the right to avoid overlap
 
 ### Miscellaneous Tasks
 
