@@ -27,78 +27,88 @@ def get_tether_dominance(df):
 
 @st.cache_resource
 def plot_stablecoins_market_dominance(df, nstables = 6):
-    # 1. Sort dataframe by circulating supply descending
-    df_sorted = df.sort_values("circulating", ascending=False)
-    
-    # 2. Extract top 5 and group the rest into "Others"
-    top_5 = df_sorted.head(nstables).copy()
-    others_sum = df_sorted.iloc[nstables:]["circulating"].sum()
-    
-    # Create a combined dataframe for plotting
-    others_df = pd.DataFrame([{"symbol": "Others", "circulating": others_sum}])
-    plot_df = pd.concat([top_5[["symbol", "circulating"]], others_df], ignore_index=True)
+    # 1. Sort and group stablecoins outside top N into 'Others'
+    df_sorted = df.sort_values(by="circulating", ascending=False).reset_index(
+        drop=True
+    )
 
-    # Calculate percentage column
-    total_circulating = plot_df["circulating"].sum()
-    plot_df["percentage"] = (plot_df["circulating"] / total_circulating) * 100
-    plot_df["percent_label"] = plot_df["percentage"].map("{:.1f}%".format)
-    
-    # 2. Define your Streamlit app colors (replace these hex codes with your actual app colors)
-    my_custom_colors = [
-        "#00FFAA", # Color 1 (e.g., Tether)
-        "#00AAFF", # Color 2 (e.g., USD Coin)
-        "#FF00AA", # Color 3
-        "#FFAA00", # Color 4
-        "#AA00FF", # Color 5
-        "#AAA0AF",
-        "#555555"  # Others (usually greyed out in dark themes)
-    ]
+    top_coins = df_sorted.iloc[:nstables].copy()
+    others_value = df_sorted.iloc[nstables:]["circulating"].sum()
 
-    
-    # 3. Base Chart Encoding
-    base = alt.Chart(plot_df).encode(
-        theta=alt.Theta(field="circulating", type="quantitative", stack=True),
+    if others_value > 0:
+        others_df = pd.DataFrame(
+            [{"symbol": "Others", "circulating": others_value}]
+        )
+        df_grouped = pd.concat([top_coins, others_df], ignore_index=True)
+    else:
+        df_grouped = top_coins
+
+    # 2. Calculate percentage share
+    total_circulating = df_grouped["circulating"].sum()
+    df_grouped["pct"] = df_grouped["circulating"] / total_circulating
+
+    # 3. Define custom color mappings (including a specific color for 'Others')
+    domain = list(df_grouped["symbol"])
+    color_palette = {
+        "USDT": "#00FFAA",
+        "USDC": "#00AAFF",
+        "DAI": "#FF00AA",
+        "USDS": "#FFAA00",
+        "USD1": "#AA00FF",
+        "USDe": "#E1A0FF",
+        "PYUSD": "#00E5FF",
+        "Others": "#6E7681",  # Neutral dark gray for 'Others'
+    }
+
+    range_colors = [color_palette.get(sym, "#9E9E9E") for sym in domain]
+
+    # 4. Plot pie/donut chart
+    base = alt.Chart(df_grouped).encode(
+        theta=alt.Theta("pct:Q", stack=True),
         color=alt.Color(
-            field="symbol",
-            type="nominal",
-            sort=None,
-            scale=alt.Scale(range=my_custom_colors),
+            "symbol:N",
             title="Stablecoin",
+            scale=alt.Scale(domain=domain, range=range_colors),
+            legend=alt.Legend(
+                labelColor="#FFFFFF", titleColor="#FFFFFF", orient="right"
+            ),
+            sort=domain,
         ),
-        order=alt.Order(field="circulating", type="quantitative", sort="ascending"),
     )
-    
-    # 4. Slices (Pie Layer)
-    pie = base.mark_arc(outerRadius=200, stroke="#0E1117", strokeWidth=2)
-    
-    # 5. Percentage Labels Layer
-    text = base.mark_text(
-        radius=250,  # Controls label distance from center (inside the slice)
-        fill="white",  # Text color
-        fontWeight="bold",
-        fontSize=16,
-    ).encode(
-        text=alt.Text("percent_label:N"),
+
+    # 5. Pie Arc Layer
+    arcs = base.mark_arc(innerRadius=0, outerRadius=150).encode(
         tooltip=[
-            "symbol",
-            alt.Tooltip("circulating:Q", format=",.0f"),
-            alt.Tooltip("percent_label:N", title="Percentage"),
-        ],
+            alt.Tooltip("symbol:N", title="Stablecoin"),
+            alt.Tooltip("pct:Q", title="Share", format=".1%"),
+            alt.Tooltip(
+                "circulating:Q", title="Circulating Supply", format="$,.0f"
+            ),
+        ]
     )
-    
-    # 6. Combine layers
+
+    # 6. Text Label Layer inside slices
+    labels = base.mark_text(
+        radius=180,  # Position labels between innerRadius (0) and outerRadius (150)
+        color="white",
+        fontSize=12,
+        fontWeight="bold",
+    ).encode(
+        text=alt.Text("pct:Q", format=".1%")  # Displays formatted percentage (e.g. 58.2%)
+    )
+
+    # 7. Combine layers
     chart = (
-        (pie + text)
+        (arcs + labels)
         .properties(
             title=f"Top {nstables} Stablecoins by Circulating Supply",
-            width=600,
-            height=600,
-            background="#0e1117",
+            width=400,
+            height=500,
+            background="#0E1117",
         )
-        .configure_title(color="white")
-        .configure_legend(labelColor="white", titleColor="white")
+        .configure_title(anchor="middle", color="#FFFFFF", fontSize=16)
+        .configure_view(strokeWidth=0)
     )
-
     return chart
 
 # historical data
