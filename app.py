@@ -103,19 +103,19 @@ with tab1:
 
     st.header("Price regression metrics")
     fig = btcplot.generate_plot_log_regression(df)
-    st.altair_chart(fig, use_container_width=True)
+    st.altair_chart(fig, width="stretch")
     
     col1, col2 = st.columns(2)
     
     with col1:
         fig = btcplot.plot_log_regression_rainbow_btc(df)
-        st.altair_chart(fig, use_container_width=True)
+        st.altair_chart(fig, width="stretch")
 
 
     
     with col2:
         fig = btcplot.plot_log_regression_btc_diff(df)
-        st.altair_chart(fig, use_container_width=True)
+        st.altair_chart(fig, width="stretch")
 
 
     st.header("Returns metrics")
@@ -125,12 +125,12 @@ with tab1:
     with col1:
         nyears = st.slider("Number of years", min_value=1, max_value=7, value=1, step=1)
         fig = btcr.n_year_returns(df, nyears)
-        st.altair_chart(fig, use_container_width=True)
+        st.altair_chart(fig, width="stretch")
 
 
     with col2:
         fig = btcr.plot_returns_t_distribution(df)
-        st.altair_chart(fig, use_container_width=True)
+        st.altair_chart(fig, width="stretch")
 
 
     # volatility
@@ -141,14 +141,14 @@ with tab1:
 
     with col1:
         fig = btcvol.plot_btc_volatility(df)
-        st.altair_chart(fig, use_container_width=True)
+        st.altair_chart(fig, width="stretch")
 
     with col2:
         fig = btcvol.plot_rvi(df)
-        st.altair_chart(fig, use_container_width=True)
+        st.altair_chart(fig, width="stretch")
 
     fig = btcvol.plot_btc_volatility_bands(df)
-    st.altair_chart(fig, use_container_width=True)
+    st.altair_chart(fig, width="stretch")
 
 
 with tab2:
@@ -190,17 +190,17 @@ with tab2:
                     options=["Absolute Value ($B)", "Percentage Share (%)"],
                     horizontal=True,)
         fig = stbl.plot_stablecoin_historical_circulating(prepared_data, normalize = chart_type == "Percentage Share (%)")
-        st.altair_chart(fig, use_container_width=True,theme=None)
+        st.altair_chart(fig, width="stretch")
 
         col1, col2 = st.columns(2)
         with col1:
             fig = stbl.plot_chain_stablecoin_dominance(stablecoininchains)
-            st.altair_chart(fig, use_container_width=True)
+            st.altair_chart(fig, width="stretch")
         
         with col2:
             # nstables = st.slider("Number of stablecoins", min_value=3, max_value = 10, value=5, step=1)
             fig = stbl.plot_stablecoins_market_dominance(df, nstables = 6)
-            st.altair_chart(fig, use_container_width=True)
+            st.altair_chart(fig, width="stretch")
 
 
                 # chains dominance
@@ -218,7 +218,7 @@ with tab2:
         for symbol, col in zip(stablenames, cols):
             with col:
                 fig = stbl.plot_stablecoin_price_histograms(stablecoinprices, symbol = symbol)
-                st.altair_chart(fig, use_container_width=True)
+                st.altair_chart(fig, width="stretch")
 
 
 with tab3:
@@ -244,7 +244,7 @@ with tab3:
         for j in range(2):
             if i + j < len(items):
                 with row[j]:
-                    st.altair_chart(items[i + j][1], use_container_width=True)
+                    st.altair_chart(items[i + j][1], width="stretch")
 
 
 

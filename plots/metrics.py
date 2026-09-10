@@ -2,14 +2,14 @@ import requests
 import streamlit as st
 
 
-@st.cache_data
+@st.cache_data(ttl=300)
 def get_snapshot():
     url = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,tether,usd-coin&vs_currencies=usd&include_24hr_change=true"
     r = requests.get(url)
     data = r.json()
     return data
 
-@st.cache_data
+@st.cache_data(ttl=300)
 def fetch_global_market_metrics():
     """Fetches total market cap, 24h change, 24h volume, and BTC dominance."""
     url = "https://api.coingecko.com/api/v3/global"

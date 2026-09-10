@@ -69,7 +69,7 @@ def n_year_returns(data_raw, n):
             ],
         )
         .transform_calculate(legend="'BTC Price'")
-        .properties(width=900, height=380)
+        .properties(width="container", height=380)
     )
 
     # 2. Bottom Chart - Returns
@@ -96,7 +96,7 @@ def n_year_returns(data_raw, n):
             ],
         )
         .transform_calculate(legend=f"'{n}-Year Return (log10)'")
-        .properties(width=900, height=180)
+        .properties(width="container", height=180)
     )
 
     # 3. Concatenate vertically
@@ -229,7 +229,7 @@ def plot_returns_t_distribution(df_raw):
         alt.layer(histogram, t_curve, ci_lines)
         .resolve_scale(y="independent")
         .properties(
-            width=900,
+            width="container",
             height=480,
             title=alt.TitleParams(
                 text="Bitcoin Daily Returns Distribution with 95% Confidence Interval",

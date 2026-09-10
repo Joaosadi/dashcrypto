@@ -213,6 +213,7 @@ def generate_plot_log_regression(df):
             ),
         )
         .properties(
+            width="container",
             height=700,
             title=alt.TitleParams(
                 text="Bitcoin Adjusted Logarithmic Regressions", color="white"
@@ -378,6 +379,7 @@ def plot_log_regression_rainbow_btc(data_raw):
             log_reg_line,
         )
         .properties(
+            width="container",
             height=700,
             title=alt.TitleParams(
                 text="Bitcoin Logarithm Regression Rainbows",
@@ -518,7 +520,7 @@ def plot_log_regression_btc_diff(data_raw):
     )
 
     top_chart = alt.layer(base_price, fit_segment, log_reg_line).properties(
-        width=900, height=380
+        width="container", height=380
     )
 
     # 2. Bottom Chart
@@ -556,7 +558,7 @@ def plot_log_regression_btc_diff(data_raw):
     )
 
     bottom_chart = alt.layer(baseline, ratio_line).properties(
-        width=900, height=180
+        width="container", height=180
     )
 
     # 3. Concatenate
