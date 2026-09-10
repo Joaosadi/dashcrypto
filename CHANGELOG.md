@@ -4,12 +4,6 @@
 
 - Stop tracking pyc and jupyter checkpoint artifacts
 - Track devcontainer config (remove it from gitignore)
-
-### 💼 Other
-
-- Daily btc candle update from binance
-- Daily btc candle update from binance
-- Daily btc candle update from binance
 ## [0.1.0] - 2026-09-10
 
 ### 🚀 Features
@@ -20,10 +14,3 @@
 ### 🚜 Refactor
 
 - Reorganized plots into their own directory
-
-### 💼 Other
-
-- Daily btc candle update from binance
-- Daily btc candle update from binance
-- Daily btc candle update from binance
-- Daily btc candle update from binance
