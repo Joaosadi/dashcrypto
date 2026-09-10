@@ -1,5 +1,9 @@
 ## [unreleased]
 
+### ⚙️ Miscellaneous Tasks
+
+- Stop tracking pyc and jupyter checkpoint artifacts
+
 ### 💼 Other
 
 - Daily btc candle update from binance
