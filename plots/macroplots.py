@@ -230,7 +230,7 @@ def create_indicator_chart(df, col, meta = None):
     chart = (
         combined.resolve_scale(y="independent")
         .properties(
-            width=900,
+            width="container",
             height=320,
             title=alt.TitleParams(
                 text=f"{meta['title']} vs BTC Close",

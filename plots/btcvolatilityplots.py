@@ -71,7 +71,7 @@ def plot_btc_volatility(df_raw, period = 30):
             ],
         )
         .transform_calculate(legend="'BTC Price'")
-        .properties(width=900, height=380)
+        .properties(width="container", height=380)
     )
 
     # 5. Bottom Chart - 30-Day Rolling Volatility
@@ -104,7 +104,7 @@ def plot_btc_volatility(df_raw, period = 30):
             ],
         )
         .transform_calculate(legend="'30D Volatility (Annualized)'")
-        .properties(width=900, height=180)
+        .properties(width="container", height=180)
     )
 
     # 6. Stack vertically
@@ -293,7 +293,7 @@ def plot_btc_volatility_bands(
     chart = (
         alt.layer(band_area, band_lines, sma_line, price_line)
         .properties(
-            width=900,
+            width="container",
             height=500,
             title=alt.TitleParams(
                 text="Bitcoin Price with 30-Day Volatility Bands Indicator",
@@ -442,7 +442,7 @@ def plot_rvi(df_raw, std_period=10, smooth_period=14):
     chart = (
         alt.layer(shading, reference_lines, rvi_line)
         .properties(
-            width=900,
+            width="container",
             height=600,
             title=alt.TitleParams(
                 text="Relative Volatility Index (RVI)",

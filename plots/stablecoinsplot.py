@@ -101,7 +101,7 @@ def plot_stablecoins_market_dominance(df, nstables = 6):
         (arcs + labels)
         .properties(
             title=f"Top {nstables} Stablecoins by Circulating Supply",
-            width=400,
+            width="container",
             height=500,
             background="#0E1117",
         )
@@ -394,7 +394,7 @@ def plot_stablecoin_price_histograms(price_df, symbol="usdt"):
         (bars + peg_line)
         .properties(
             title=f"{symbol.upper()} Price Distribution",
-            width=600,
+            width="container",
             height=300,
         )
         .configure_title(
@@ -511,7 +511,7 @@ def plot_chain_stablecoin_dominance(df):
         (arcs + labels)
         .properties(
             title="Stablecoin Market Share by Chain (%)",
-            width=400,
+            width="container",
             height=500,
             background="#0E1117",
         )
