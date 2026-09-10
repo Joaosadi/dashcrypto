@@ -88,4 +88,75 @@
         font-size: 0.8rem !important;
         font-weight: 600 !important;
     }
+
+    /* ===== Mobile Responsive ===== */
+
+    /* Tablets: metric cards 3-up */
+    @media (max-width: 1024px) and (min-width: 769px) {
+        div[data-testid="stColumn"]:has(div[data-testid="stMetric"]) {
+            flex: 1 1 33% !important;
+            min-width: 33% !important;
+        }
+    }
+
+    /* Phones: stack everything, metric cards 2-up */
+    @media (max-width: 768px) {
+        .block-container {
+            padding-top: 1rem;
+        }
+
+        /* Allow column grids to wrap */
+        div[data-testid="stHorizontalBlock"] {
+            flex-wrap: wrap;
+        }
+
+        /* Non-metric columns (charts, controls): full width */
+        div[data-testid="stColumn"]:not(:has(div[data-testid="stMetric"])) {
+            flex: 1 1 100% !important;
+            min-width: 100% !important;
+        }
+
+        /* Metric cards: 2 per row */
+        div[data-testid="stColumn"]:has(div[data-testid="stMetric"]) {
+            flex: 1 1 48% !important;
+            min-width: 48% !important;
+        }
+
+        /* Header banner */
+        .title-banner {
+            padding: 16px 20px;
+            margin-bottom: 16px;
+        }
+        .title-banner h1 {
+            font-size: 1.5rem;
+        }
+        .title-banner p {
+            font-size: 0.9rem;
+        }
+
+        /* Footer: stop floating over content on small screens */
+        .custom-footer {
+            position: static;
+            margin-top: 1.5rem;
+            padding: 12px 8px calc(12px + env(safe-area-inset-bottom, 0px));
+        }
+    }
+
+    /* Small phones: metric cards stack full width */
+    @media (max-width: 420px) {
+        div[data-testid="stColumn"]:has(div[data-testid="stMetric"]) {
+            flex: 1 1 100% !important;
+            min-width: 100% !important;
+        }
+    }
+
+    /* Respect reduced-motion preferences */
+    @media (prefers-reduced-motion: reduce) {
+        div[data-testid="stMetric"], div[data-testid="metric-container"] {
+            transition: none;
+        }
+        div[data-testid="stMetric"]:hover, div[data-testid="metric-container"]:hover {
+            transform: none;
+        }
+    }
 </style>
