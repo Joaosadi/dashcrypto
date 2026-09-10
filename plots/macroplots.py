@@ -155,7 +155,7 @@ def create_indicator_chart(df, col, meta = None):
         ),
         legend=alt.Legend(
             title="Model Traces",
-            orient="top-left",
+            orient="right",
             fillColor="#0e1117",
             strokeColor="#333333",
             padding=8,
