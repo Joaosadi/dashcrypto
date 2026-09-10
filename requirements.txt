@@ -1,5 +1,5 @@
 # Web Framework
-streamlit>=1.30.0
+streamlit>=1.49.0
 
 # Data Manipulation & Analysis
 pandas>=2.0.0
