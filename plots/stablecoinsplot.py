@@ -2,7 +2,6 @@ import requests
 import streamlit as st
 import pandas as pd
 import altair as alt
-import time
 import numpy as np
 
 @st.cache_data
@@ -115,37 +114,27 @@ def plot_stablecoins_market_dominance(df, nstables = 6):
 
 @st.cache_data
 def get_stablecoin_historical_data(id="1"):
-    
-    url = f"https://stablecoins.llama.fi/stablecoin/{id}"
-    r = requests.get(url).json()
-    
+    # Lightweight per-day total across all chains (~0.5 MB) instead of the
+    # ~20 MB chainBalances payload from /stablecoin/{id}.
+    url = f"https://stablecoins.llama.fi/stablecoincharts/all?stablecoin={id}"
+    r = requests.get(url, timeout=60).json()
+
     dictlist = []
-    for chain, data in r["chainBalances"].items():
-        datalist = data["tokens"]
-        for d in datalist:
-            try:
-                date = pd.to_datetime(d["date"], unit="s")
-                circulating = d["circulating"]["peggedUSD"]
-                dictlist.append({"date": date, "circulating": circulating, "symbol": r["symbol"], "chain": chain})
-            except:
-                # print("This went wrong:", d)
-                continue
-    df = pd.DataFrame(dictlist)
-    return df
+    for d in r:
+        circ = d["totalCirculating"].get("peggedUSD")
+        if circ is None:
+            continue
+        dictlist.append({"date": pd.to_datetime(int(d["date"]), unit="s"), "circulating": circ})
+    return pd.DataFrame(dictlist)
 
 @st.cache_data
 def prepare_top_stablecoin_data(df, nstables = 6):
-    df_sorted = df.sort_values("circulating", ascending = False)
-    ids = df_sorted["id"].head(nstables)
+    df_sorted = df.sort_values("circulating", ascending = False).head(nstables)
     series_dict = dict()
-    for id in ids:
-        # print(f"Downloading data for id {id}.")
-        time.sleep(1)
+    for id, symbol in zip(df_sorted["id"], df_sorted["symbol"]):
         coindata = get_stablecoin_historical_data(id=id)
-        symbol = coindata["symbol"].values[0]
         coindata = coindata.groupby("date")["circulating"].sum()
         series_dict[symbol] = coindata
-        # print(f"Finished data for id {id}.")
 
     result = pd.concat(series_dict, axis = 1).fillna(0)
     result = result.sort_index().reset_index()
