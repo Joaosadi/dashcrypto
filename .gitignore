@@ -1,3 +1,4 @@
+# Environment & local config
 .env
 .obsidian/
 .agents/
@@ -10,7 +11,9 @@
 copilot/
 .smtcmp_vector_db.tar.gz
 
+# Python cache artifacts
+__pycache__/
+*.pyc
 
-
-# Ignore Smart Environment folder
-.smart-env
+# Jupyter checkpoints
+.ipynb_checkpoints/
