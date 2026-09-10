@@ -3,7 +3,7 @@
 ### Performance
 
 - Speed up stablecoin historical data fetch
-- Cache CoinGecko snapshot fetches for 5 minutes
+- Cache coin gecko snapshot fetches for 5 minutes
 
 ### Styling
 
@@ -19,8 +19,7 @@
 - Track devcontainer config (remove it from gitignore)
 - Exclude automated data-sync commits from changelog
 - Remove icons from changelog headings
-- Add Streamlit dark theme config and require streamlit 1.49+
-
+- Add streamlit dark theme config and require streamlit 1.49+
 ## [0.1.0] - 2026-09-10
 
 ### Features
