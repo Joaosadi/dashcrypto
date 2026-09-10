@@ -1,5 +1,10 @@
 ## [unreleased]
 
+### 🎨 Styling
+
+- Restyle stablecoin supply chart to match market share chart
+- Match macro metrics charts to BTC tab styling
+
 ### ⚙️ Miscellaneous Tasks
 
 - Stop tracking pyc and jupyter checkpoint artifacts
