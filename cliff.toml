@@ -49,6 +49,10 @@ require_conventional = false
 split_commits = false
 # An array of regex based parsers to modify commit messages prior to further processing.
 commit_preprocessors = [
+    # Fix commits that squash multiple conventional headers onto consecutive lines
+    # (e.g. "feat: ...\nrefactor: ..."). Insert a blank line between them so git-cliff's
+    # conventional parser accepts the commit instead of silently dropping it from the changelog.
+    { pattern = '\n((?:feat|fix|doc|docs|perf|refactor|style|test|chore|ci|build|revert|auto)(?:\([^)]*\))?!?: )', replace = "\n\n$1" },
     # Replace issue numbers with link templates to be updated in `changelog.postprocessors`.
     #{ pattern = '\((\w+\s)?#([0-9]+)\)', replace = "([#${2}](<REPO>/issues/${2}))"},
     # Check spelling of the commit message using https://github.com/crate-ci/typos.
@@ -63,6 +67,9 @@ protect_breaking_commits = false
 commit_parsers = [
     { message = "^feat", group = "<!-- 0 -->🚀 Features" },
     { message = "^fix", group = "<!-- 1 -->🐛 Bug Fixes" },
+    # Skip the changelog's own auto-update commits, otherwise every regeneration
+    # adds another "docs(changelog)" entry for the previous regeneration.
+    { message = "^docs\\(changelog\\)", skip = true },
     { message = "^doc", group = "<!-- 3 -->📚 Documentation" },
     { message = "^perf", group = "<!-- 4 -->⚡ Performance" },
     { message = "^refactor", group = "<!-- 2 -->🚜 Refactor" },
