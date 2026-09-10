@@ -4,7 +4,6 @@
 .agents/
 .claude/
 .copilot/
-.devcontainer/
 .opencode/
 .smart-env/
 .smtcmp_json_db/
