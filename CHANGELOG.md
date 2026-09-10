@@ -4,6 +4,7 @@
 
 - Stop tracking pyc and jupyter checkpoint artifacts
 - Track devcontainer config (remove it from gitignore)
+- Exclude automated data-sync commits from changelog
 ## [0.1.0] - 2026-09-10
 
 ### 🚀 Features
