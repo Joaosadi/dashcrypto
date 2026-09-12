@@ -1,162 +1,116 @@
-<style>
-    /* Global Container Padding */
-    .block-container {
-        padding-top: 1.5rem;
-        padding-bottom: 3rem;
+/* ==============================================================================
+   1. RESET E ESTILOS GERAIS DA PÁGINA
+   ============================================================================== */
+.main .block-container {
+    padding-top: 1.5rem !important;
+    padding-bottom: 2rem !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    max-width: 100% !important;
+}
+
+/* ==============================================================================
+   2. HEADER BANNER ADAPTÁVEL
+   ============================================================================== */
+.title-banner {
+    background: linear-gradient(135deg, #0e1117 0%, #161b22 100%);
+    border: 1px solid #30363d;
+    padding: 1.5rem;
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.title-banner h1 {
+    color: #ffffff;
+    font-size: clamp(1.4rem, 2.5vw, 2.2rem); /* Fonte fluida e responsiva */
+    margin-bottom: 0.3rem;
+    font-weight: 700;
+}
+
+.title-banner p {
+    color: #8b949e;
+    font-size: clamp(0.85rem, 1.2vw, 1.1rem);
+    margin: 0;
+}
+
+/* ==============================================================================
+   3. MÉTRICAS (ST.METRIC)
+   ============================================================================== */
+div[data-testid="stMetric"] {
+    background-color: #161b22;
+    border: 1px solid #30363d;
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+div[data-testid="stMetricLabel"] {
+    font-size: 0.85rem !important;
+    color: #8b949e !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+div[data-testid="stMetricValue"] {
+    font-size: clamp(1.1rem, 2vw, 1.5rem) !important;
+    font-weight: 600 !important;
+}
+
+/* ==============================================================================
+   4. ADEQUAÇÃO DE COLUNAS E GRÁFICOS PARA MOBILE (@MEDIA)
+   ============================================================================== */
+@media (max-width: 768px) {
+
+    div[data-testid="column"] {
+        width: 100% !important;
+        flex: 1 1 100% !important;
+        min-width: 100% !important;
+        margin-bottom: 0.5rem;
     }
     
-    /* Header Banner Styling */
-    .title-banner {
-        background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);
-        padding: 24px 32px;
-        border-radius: 12px;
-        color: #ffffff;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-        margin-bottom: 24px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    .title-banner h1 {
-        margin: 0;
-        font-size: 2.2rem;
-        font-weight: 700;
-        color: #ffffff;
-    }
-    .title-banner p {
-        margin: 6px 0 0 0;
-        font-size: 1rem;
-        color: #c7d2fe;
+
+    div[data-testid="stVegaLiteChart"] {
+        width: 100% !important;
+        overflow-x: auto;
     }
 
-    /* Footer Styling */
-    .custom-footer {
-        position: fixed;
-        left: 0;
-        bottom: 0;
-        width: 100%;
-        background-color: #0e1117;
-        color: #888888;
-        text-align: center;
-        padding: 8px 0;
-        font-size: 0.85rem;
-        border-top: 1px solid #222222;
-        z-index: 999;
-    }
-    .custom-footer a {
-        color: #8b5cf6;
-        text-decoration: none;
-        font-weight: 600;
-    }
-    .custom-footer a:hover {
-        text-decoration: underline;
+
+    .main .block-container {
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
     }
 
-    /* Target the outer container of st.metric */
-    div[data-testid="stMetric"], div[data-testid="metric-container"] {
-        background-color: #131722;
-        border: 1px solid #2a2e39;
-        border-radius: 10px;
-        padding: 16px 20px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        transition: transform 0.2s ease, border-color 0.2s ease;
-    }
-    
-    /* Hover state for interactive feel */
-    div[data-testid="stMetric"]:hover, div[data-testid="metric-container"]:hover {
-        border-color: #434651;
-        transform: translateY(-2px);
-    }
-    
-    /* Target the Metric Label (title) */
-    [data-testid="stMetricLabel"] {
+
+    button[data-baseweb="tab"] {
         font-size: 0.85rem !important;
-        font-weight: 600 !important;
-        color: #848e9c !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.5px !important;
+        padding: 8px 12px !important;
     }
-    
-    /* Target the Metric Value (main price/number) */
-    [data-testid="stMetricValue"] {
-        font-size: 1.6rem !important;
-        font-weight: 700 !important;
-        color: #ffffff !important;
-        letter-spacing: -0.5px !important;
+}
+
+/* ==============================================================================
+   5. FOOTER
+   ============================================================================== */
+.custom-footer {
+    text-align: center;
+    padding: 1.5rem 0 0.5rem 0;
+    color: #484f58;
+    font-size: 0.8rem;
+    border-top: 1px solid #21262d;
+    margin-top: 2rem;
+}
+
+div[data-testid="stVegaLiteChart"] {
+    min-height: 400px !important;
+}
+
+@media (max-width: 768px) {
+    div[data-testid="stVegaLiteChart"] {
+        min-height: 320px !important;
     }
-    
-    /* Target the Delta text (percentage/change) */
-    [data-testid="stMetricDelta"] {
-        font-size: 0.8rem !important;
-        font-weight: 600 !important;
-    }
+}
 
-    /* ===== Mobile Responsive ===== */
-
-    /* Tablets: metric cards 3-up */
-    @media (max-width: 1024px) and (min-width: 769px) {
-        div[data-testid="stColumn"]:has(div[data-testid="stMetric"]) {
-            flex: 1 1 33% !important;
-            min-width: 33% !important;
-        }
-    }
-
-    /* Phones: stack everything, metric cards 2-up */
-    @media (max-width: 768px) {
-        .block-container {
-            padding-top: 1rem;
-        }
-
-        /* Allow column grids to wrap */
-        div[data-testid="stHorizontalBlock"] {
-            flex-wrap: wrap;
-        }
-
-        /* Non-metric columns (charts, controls): full width */
-        div[data-testid="stColumn"]:not(:has(div[data-testid="stMetric"])) {
-            flex: 1 1 100% !important;
-            min-width: 100% !important;
-        }
-
-        /* Metric cards: 2 per row */
-        div[data-testid="stColumn"]:has(div[data-testid="stMetric"]) {
-            flex: 1 1 48% !important;
-            min-width: 48% !important;
-        }
-
-        /* Header banner */
-        .title-banner {
-            padding: 16px 20px;
-            margin-bottom: 16px;
-        }
-        .title-banner h1 {
-            font-size: 1.5rem;
-        }
-        .title-banner p {
-            font-size: 0.9rem;
-        }
-
-        /* Footer: stop floating over content on small screens */
-        .custom-footer {
-            position: static;
-            margin-top: 1.5rem;
-            padding: 12px 8px calc(12px + env(safe-area-inset-bottom, 0px));
-        }
-    }
-
-    /* Small phones: metric cards stack full width */
-    @media (max-width: 420px) {
-        div[data-testid="stColumn"]:has(div[data-testid="stMetric"]) {
-            flex: 1 1 100% !important;
-            min-width: 100% !important;
-        }
-    }
-
-    /* Respect reduced-motion preferences */
-    @media (prefers-reduced-motion: reduce) {
-        div[data-testid="stMetric"], div[data-testid="metric-container"] {
-            transition: none;
-        }
-        div[data-testid="stMetric"]:hover, div[data-testid="metric-container"]:hover {
-            transform: none;
-        }
-    }
-</style>
+div[data-testid="stVegaLiteChart"] svg {
+    overflow: visible !important;
+}

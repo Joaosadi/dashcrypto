@@ -25,8 +25,7 @@ def get_tether_dominance(df):
 
 
 @st.cache_resource
-def plot_stablecoins_market_dominance(df, nstables = 6):
-    # 1. Sort and group stablecoins outside top N into 'Others'
+def plot_stablecoins_market_dominance(df, nstables=6):
     df_sorted = df.sort_values(by="circulating", ascending=False).reset_index(
         drop=True
     )
@@ -42,11 +41,9 @@ def plot_stablecoins_market_dominance(df, nstables = 6):
     else:
         df_grouped = top_coins
 
-    # 2. Calculate percentage share
     total_circulating = df_grouped["circulating"].sum()
     df_grouped["pct"] = df_grouped["circulating"] / total_circulating
 
-    # 3. Define custom color mappings (including a specific color for 'Others')
     domain = list(df_grouped["symbol"])
     color_palette = {
         "USDT": "#00FFAA",
@@ -56,27 +53,31 @@ def plot_stablecoins_market_dominance(df, nstables = 6):
         "USD1": "#AA00FF",
         "USDe": "#E1A0FF",
         "PYUSD": "#00E5FF",
-        "Others": "#6E7681",  # Neutral dark gray for 'Others'
+        "Others": "#6E7681",
     }
-
     range_colors = [color_palette.get(sym, "#9E9E9E") for sym in domain]
 
-    # 4. Plot pie/donut chart
     base = alt.Chart(df_grouped).encode(
         theta=alt.Theta("pct:Q", stack=True),
         color=alt.Color(
             "symbol:N",
-            title="Stablecoin",
+            title=None,
             scale=alt.Scale(domain=domain, range=range_colors),
             legend=alt.Legend(
-                labelColor="#FFFFFF", titleColor="#FFFFFF", orient="right"
-            ),
+                    orient="bottom",
+                    direction="horizontal",
+                    columns=4,           # Quebra os itens em no máximo 4 colunas por linha
+                    symbolLimit=10,      # Garante a exibição de todos os itens
+                    labelColor="#FFFFFF",
+                    labelFontSize=10,
+                    padding=10           # Garante respiro entre o gráfico e a legenda
+                ),
             sort=domain,
         ),
     )
 
-    # 5. Pie Arc Layer
-    arcs = base.mark_arc(innerRadius=0, outerRadius=150).encode(
+    # Reduzido o raio externo para evitar transbordo em telas pequenas
+    arcs = base.mark_arc(innerRadius=40, outerRadius=110).encode(
         tooltip=[
             alt.Tooltip("symbol:N", title="Stablecoin"),
             alt.Tooltip("pct:Q", title="Share", format=".1%"),
@@ -86,26 +87,26 @@ def plot_stablecoins_market_dominance(df, nstables = 6):
         ]
     )
 
-    # 6. Text Label Layer inside slices
+    # Posicionado a label de porcentagem dentro/borda da fatia (radius=130 em vez de 180)
     labels = base.mark_text(
-        radius=180,  # Position labels between innerRadius (0) and outerRadius (150)
-        color="white",
-        fontSize=12,
-        fontWeight="bold",
-    ).encode(
-        text=alt.Text("pct:Q", format=".1%")  # Displays formatted percentage (e.g. 58.2%)
-    )
+        radius=130, color="white", fontSize=11, fontWeight="bold"
+    ).encode(text=alt.Text("pct:Q", format=".1%"))
 
-    # 7. Combine layers
     chart = (
         (arcs + labels)
         .properties(
-            title=f"Top {nstables} Stablecoins by Circulating Supply",
+            title="Top Stablecoins Market Share",
             width="container",
-            height=500,
+            height=360,  # Ligeiro aumento para dar respiro
+            padding={"top": 30, "bottom": 10, "left": 10, "right": 10}, # Garante espaço em volta
             background="#0E1117",
         )
-        .configure_title(anchor="middle", color="#FFFFFF", fontSize=16)
+        .configure_title(
+            anchor="middle",
+            color="#FFFFFF",
+            fontSize=15,
+            dy=10  # Empurra o título levemente para DENTRO da área visível (evita o corte no topo)
+        )
         .configure_view(strokeWidth=0)
     )
     return chart
@@ -145,7 +146,6 @@ def prepare_top_stablecoin_data(df, nstables = 6):
 
 @st.cache_resource
 def plot_stablecoin_historical_circulating(prepared_data, normalize=False):
-    # 1. Fill missing data & resample weekly
     prepared_data = prepared_data.copy()
     prepared_data["circulating_b"] = prepared_data["circulating_b"].fillna(0.0)
 
@@ -157,25 +157,26 @@ def plot_stablecoin_historical_circulating(prepared_data, normalize=False):
         .reset_index()
     )
 
-    # 2. Build complete date/symbol grid to prevent stack breaks
     all_dates = df_weekly["date"].unique()
     all_symbols = df_weekly["symbol"].unique()
 
-    full_grid = pd.MultiIndex.from_product(
-        [all_dates, all_symbols], names=["date", "symbol"]
-    ).to_frame().reset_index(drop=True)
+    full_grid = (
+        pd.MultiIndex.from_product(
+            [all_dates, all_symbols], names=["date", "symbol"]
+        )
+        .to_frame()
+        .reset_index(drop=True)
+    )
 
     df_weekly = pd.merge(
         full_grid, df_weekly, on=["date", "symbol"], how="left"
     )
     df_weekly["circulating_b"] = df_weekly["circulating_b"].fillna(0.0)
 
-    # 3. Order symbols by latest total circulating supply
     latest_date = df_weekly["date"].max()
     latest_values = df_weekly[df_weekly["date"] == latest_date].sort_values(
         by="circulating_b", ascending=False
     )
-
     sorted_symbols = latest_values["symbol"].tolist()
 
     if "Others" in sorted_symbols:
@@ -186,7 +187,6 @@ def plot_stablecoin_historical_circulating(prepared_data, normalize=False):
         df_weekly["symbol"], categories=sorted_symbols, ordered=True
     )
 
-    # 4. Color Mapping with Dynamic Fallbacks (Fixes Omitted Symbols)
     base_color_map = {
         "USDT": "#00FFAA",
         "USDC": "#00AAFF",
@@ -197,7 +197,6 @@ def plot_stablecoin_historical_circulating(prepared_data, normalize=False):
         "PYUSD": "#00E5FF",
         "Others": "#6E7681",
     }
-
     fallback_palette = [
         "#FF5722",
         "#E91E63",
@@ -209,46 +208,39 @@ def plot_stablecoin_historical_circulating(prepared_data, normalize=False):
 
     domain = sorted_symbols
     range_colors = []
-
     fallback_idx = 0
     for sym in domain:
         if sym in base_color_map:
             range_colors.append(base_color_map[sym])
         else:
-            # Assign a fallback color if symbol isn't hardcoded
             range_colors.append(
                 fallback_palette[fallback_idx % len(fallback_palette)]
             )
             fallback_idx += 1
 
-    # Chart Configuration
     stack_mode = "normalize" if normalize else "zero"
-    y_title = (
-        "Market Share Percentage"
-        if normalize
-        else "Total Circulating Supply ($ Billions)"
-    )
+    y_title = "Share (%)" if normalize else "Supply ($B)"
     y_format = ".0%" if normalize else "$~s"
     chart_title = (
-        "Stablecoin Market Share Over Time (%)"
+        "Market Share Over Time (%)"
         if normalize
-        else "Stablecoin Circulating Supply Over Time"
+        else "Circulating Supply Over Time"
     )
 
-    # 5. Render Altair Chart
     chart = (
         alt.Chart(df_weekly)
         .mark_area(opacity=0.85, stroke="rgba(255,255,255,0.1)", strokeWidth=0.5)
         .encode(
             x=alt.X(
                 "date:T",
-                title="Date",
+                title=None,
                 axis=alt.Axis(
                     format="%b %Y",
                     gridColor="#22272E",
                     domainColor="#444C56",
                     labelColor="#ADB5BD",
-                    titleColor="#FFFFFF",
+                    labelAngle=-45,  # Inclinação previne sobreposição de datas no mobile
+                    labelFontSize=10,
                 ),
             ),
             y=alt.Y(
@@ -261,16 +253,19 @@ def plot_stablecoin_historical_circulating(prepared_data, normalize=False):
                     domainColor="#444C56",
                     labelColor="#ADB5BD",
                     titleColor="#FFFFFF",
+                    labelFontSize=10,
+                    titleFontSize=11,
                 ),
             ),
             color=alt.Color(
                 "symbol:N",
-                title="Stablecoin",
+                title=None,
                 scale=alt.Scale(domain=domain, range=range_colors),
                 legend=alt.Legend(
+                    orient="bottom",  # Move legenda para baixo
+                    direction="horizontal",
                     labelColor="#FFFFFF",
-                    titleColor="#FFFFFF",
-                    orient="right",
+                    labelFontSize=11,
                 ),
                 sort=sorted_symbols,
             ),
@@ -286,13 +281,12 @@ def plot_stablecoin_historical_circulating(prepared_data, normalize=False):
         .properties(
             title=chart_title,
             width="container",
-            height=600,
+            height=350,  # Reduzido de 600 para 350px para caber na tela do celular
             background="#0e1117",
         )
-        .configure_title(color="#FFFFFF", fontSize=18)
+        .configure_title(color="#FFFFFF", fontSize=15, anchor="start")
         .configure_view(strokeWidth=0)
     )
-
     return chart
 
 
@@ -318,19 +312,16 @@ def get_stablecoin_prices():
 
 @st.cache_resource
 def plot_stablecoin_price_histograms(price_df, symbol="usdt"):
-    # Case-insensitive filtering
     token_df = price_df[
         price_df["stablecoin"].str.lower() == symbol.lower()
     ].copy()
 
     if token_df.empty:
-        # Fallback if symbol isn't found
         token_df = price_df[
             price_df["stablecoin"].str.contains(symbol, case=False, na=False)
         ].copy()
 
-    # 1. Pre-calculate histogram bins in Pandas to prevent sub-segment stacking
-    counts, bin_edges = np.histogram(token_df["price"].dropna(), bins=40)
+    counts, bin_edges = np.histogram(token_df["price"].dropna(), bins=30)
 
     binned_df = pd.DataFrame(
         {
@@ -343,7 +334,6 @@ def plot_stablecoin_price_histograms(price_df, symbol="usdt"):
 
     color = "#A01236"
 
-    # 2. Plot pre-aggregated bins as clean, single bars
     bars = (
         alt.Chart(binned_df)
         .mark_bar(
@@ -362,16 +352,21 @@ def plot_stablecoin_price_histograms(price_df, symbol="usdt"):
                     domainColor="#444C56",
                     labelColor="#ADB5BD",
                     titleColor="#FFFFFF",
+                    labelAngle=-45,  # Evita colisão nos valores de preço no mobile
+                    labelFontSize=10,
+                    titleFontSize=11,
                 ),
             ),
             y=alt.Y(
                 "count:Q",
-                title="Frequency (Days)",
+                title="Days",
                 axis=alt.Axis(
                     gridColor="#22272E",
                     domainColor="#444C56",
                     labelColor="#ADB5BD",
                     titleColor="#FFFFFF",
+                    labelFontSize=10,
+                    titleFontSize=11,
                 ),
             ),
             tooltip=[
@@ -382,28 +377,23 @@ def plot_stablecoin_price_histograms(price_df, symbol="usdt"):
         )
     )
 
-    # $1.00 Peg Baseline Reference Line
     peg_line = (
         alt.Chart(pd.DataFrame([{"peg": 1.00}]))
         .mark_rule(color="#F6465D", strokeDash=[4, 4], strokeWidth=2)
         .encode(x="peg:Q")
     )
 
-    # Combine chart
     chart = (
         (bars + peg_line)
         .properties(
             title=f"{symbol.upper()} Price Distribution",
             width="container",
-            height=300,
+            height=280,
+            background="#0E1117",
         )
-        .configure_title(
-            anchor="middle",
-            color="#FFFFFF",
-            fontSize=18,
-        )
+        .configure_title(anchor="start", color="#FFFFFF", fontSize=15)
+        .configure_view(strokeWidth=0)
     )
-
     return chart
 
 
@@ -436,15 +426,14 @@ def get_ethereum_stablecoin_dominance(df):
 
 @st.cache_resource
 def plot_chain_stablecoin_dominance(df):
-    # 1. Sort and group chains outside top 4 into 'Others'
     top_n = 5
     df_sorted = df.sort_values(by="circulating", ascending=False).reset_index(
         drop=True
     )
-    
+
     top_chains = df_sorted.iloc[:top_n].copy()
     others_value = df_sorted.iloc[top_n:]["circulating"].sum()
-    
+
     if others_value > 0:
         others_df = pd.DataFrame(
             [{"chain": "Others", "circulating": others_value}]
@@ -452,12 +441,10 @@ def plot_chain_stablecoin_dominance(df):
         df_grouped = pd.concat([top_chains, others_df], ignore_index=True)
     else:
         df_grouped = top_chains
-    
-    # 2. Calculate percentage share
+
     total_circulating = df_grouped["circulating"].sum()
     df_grouped["pct"] = df_grouped["circulating"] / total_circulating
-    
-    # 3. Define custom color mappings (including a specific color for 'Others')
+
     domain = list(df_grouped["chain"])
     color_palette = {
         "Ethereum": "#627EEA",
@@ -465,28 +452,31 @@ def plot_chain_stablecoin_dominance(df):
         "Solana": "#14F195",
         "BSC": "#F3BA2F",
         "Hyperliquid L1": "#00AEE9",
-        "Others": "#6E7681",  # Neutral dark gray for 'Others'
+        "Others": "#6E7681",
     }
-    
+
     range_colors = [color_palette.get(chain, "#9E9E9E") for chain in domain]
-    
-    # 4. Plot pie/donut chart
-    # 2. Base encoding for both pie arc and text marks
+
     base = alt.Chart(df_grouped).encode(
         theta=alt.Theta("pct:Q", stack=True),
         color=alt.Color(
             "chain:N",
-            title="Blockchain",
+            title=None,
             scale=alt.Scale(domain=domain, range=range_colors),
             legend=alt.Legend(
-                labelColor="#FFFFFF", titleColor="#FFFFFF", orient="right"
+                orient="bottom",
+                direction="horizontal",
+                columns=4,           # Quebra os itens em no máximo 4 colunas por linha
+                symbolLimit=10,      # Garante a exibição de todos os itens
+                labelColor="#FFFFFF",
+                labelFontSize=10,
+                padding=10           # Garante respiro entre o gráfico e a legenda
             ),
             sort=domain,
         ),
     )
-    
-    # 3. Donut Arc Layer
-    arcs = base.mark_arc(innerRadius=0, outerRadius=150).encode(
+
+    arcs = base.mark_arc(innerRadius=40, outerRadius=110).encode(
         tooltip=[
             alt.Tooltip("chain:N", title="Chain"),
             alt.Tooltip("pct:Q", title="Share", format=".1%"),
@@ -495,27 +485,26 @@ def plot_chain_stablecoin_dominance(df):
             ),
         ]
     )
-    
-    # 4. Text Label Layer inside slices
+
     labels = base.mark_text(
-        radius=180,  # Position labels between innerRadius (80) and outerRadius (150)
-        color="white",
-        fontSize=12,
-        fontWeight="bold",
-    ).encode(
-        text=alt.Text("pct:Q", format=".1%")  # Displays formatted percentage (e.g. 58.2%)
-    )
-    
-    # 5. Combine layers
+        radius=130, color="white", fontSize=11, fontWeight="bold"
+    ).encode(text=alt.Text("pct:Q", format=".1%"))
+
     chart = (
         (arcs + labels)
         .properties(
-            title="Stablecoin Market Share by Chain (%)",
+            title="Top Chains by Circulating Stablecoins",
             width="container",
-            height=500,
+            height=360,  # Ligeiro aumento para dar respiro
+            padding={"top": 30, "bottom": 10, "left": 10, "right": 10}, # Garante espaço em volta
             background="#0E1117",
         )
-        .configure_title(anchor="middle", color="#FFFFFF", fontSize=16)
+        .configure_title(
+            anchor="middle",
+            color="#FFFFFF",
+            fontSize=15,
+            dy=10  # Empurra o título levemente para DENTRO da área visível (evita o corte no topo)
+        )
         .configure_view(strokeWidth=0)
     )
     return chart

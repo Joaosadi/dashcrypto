@@ -128,12 +128,8 @@ indicator_meta = {
 
 
 
-def create_indicator_chart(df, col, meta = None):
-    """Generates an interactive dual-axis Altair chart for a macro indicator vs BTC.
-
-    Styled to match the charts on the "BTC price metrics" tab (dark theme,
-    card legend, same axis/grid colors and title treatment).
-    """
+def create_indicator_chart(df, col, meta=None):
+    """Generates a responsive dual-axis Altair chart optimized for mobile screens."""
     if meta is None:
         meta = indicator_meta[col]
 
@@ -146,7 +142,7 @@ def create_indicator_chart(df, col, meta = None):
     date_col = "index" if "index" in data.columns else "date"
     data[date_col] = pd.to_datetime(data[date_col])
 
-    # 0. Master Legend Scale (BTC-tab palette)
+    # 0. Master Legend Scale (Posicionada na parte inferior para economizar espaço horizontal)
     color_scale = alt.Color(
         "legend:N",
         scale=alt.Scale(
@@ -154,14 +150,15 @@ def create_indicator_chart(df, col, meta = None):
             range=["#7FFFD4", "#1E90FF"],  # Aquamarine & Dodger Blue
         ),
         legend=alt.Legend(
-            title="Model Traces",
-            orient="right",
+            title=None,
+            orient="bottom",  # Move a legenda para baixo
+            direction="horizontal",
             fillColor="#0e1117",
             strokeColor="#333333",
-            padding=8,
+            padding=5,
             cornerRadius=5,
             labelColor="#cccccc",
-            titleColor="#ffffff",
+            labelFontSize=11,
         ),
     )
 
@@ -169,9 +166,13 @@ def create_indicator_chart(df, col, meta = None):
     base = alt.Chart(data).encode(
         x=alt.X(
             f"{date_col}:T",
-            title="Date",
+            title=None,  # Remove o título "Date" para poupar espaço vertical
             axis=alt.Axis(
-                format="%Y-%m", gridColor="#222222", labelColor="#cccccc"
+                format="%Y-%m",
+                gridColor="#222222",
+                labelColor="#cccccc",
+                labelAngle=-45,  # Inclina os rótulos de data no mobile
+                labelFontSize=10,
             ),
         )
     )
@@ -186,6 +187,8 @@ def create_indicator_chart(df, col, meta = None):
                 titleColor="#1E90FF",
                 labelColor="#cccccc",
                 gridColor="#222222",
+                labelFontSize=10,
+                titleFontSize=11,
             ),
         ),
         color=color_scale,
@@ -201,10 +204,14 @@ def create_indicator_chart(df, col, meta = None):
     ).encode(
         y=alt.Y(
             "btc_close:Q",
-            title="BTC Close (USD, log)",
+            title="BTC (Log)",  # Encurtado para caber em telas pequenas
             scale=alt.Scale(type="log"),
             axis=alt.Axis(
-                titleColor="#7FFFD4", labelColor="#cccccc", orient="right"
+                titleColor="#7FFFD4",
+                labelColor="#cccccc",
+                orient="right",
+                labelFontSize=10,
+                titleFontSize=11,
             ),
         ),
         color=color_scale,
@@ -226,21 +233,22 @@ def create_indicator_chart(df, col, meta = None):
     else:
         combined = alt.layer(macro_line, btc_line)
 
-    # 5. Resolve dual independent Y-axes & dark theme styling (BTC-tab style)
+    # 5. Configuração de Responsividade e Títulos
     chart = (
         combined.resolve_scale(y="independent")
         .properties(
-            width="container",
-            height=320,
+            width="container",  # Permite que o Altair se expanda no container do Streamlit
+            height=450,        # Altura ligeiramente reduzida para caber na tela do celular
             title=alt.TitleParams(
-                text=f"{meta['title']} vs BTC Close",
-                subtitle=(
-                    f"{meta['ylabel']} (left axis) | "
-                    "BTC Close (right axis, log scale)"
-                ),
+                text=f"{meta['legend']} vs BTC", # Título curto
+                subtitle=[
+                    f"Eixo Esq: {meta['ylabel']}", 
+                    "Eixo Dir: BTC (Escala Log)"
+                ], # Subtítulo em lista (duas linhas) evita quebra/corte horizontal
                 color="white",
                 subtitleColor="#aaaaaa",
-                fontSize=18,
+                fontSize=14,
+                subtitleFontSize=11,
                 anchor="start",
             ),
             background="#0e1117",
