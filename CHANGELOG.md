@@ -5,6 +5,10 @@
 - Speed up stablecoin historical data fetch
 - Cache coin gecko snapshot fetches for 5 minutes
 
+### Refactor
+
+- Made major changes to all charts to make them more responsive, especially on phones
+
 ### Styling
 
 - Restyle stablecoin supply chart to match market share chart
