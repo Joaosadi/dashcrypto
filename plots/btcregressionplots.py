@@ -13,6 +13,7 @@ def fit_func(x, p1, p2, p3):
 
 fitcut = (60, 13 * 365)
 
+CHARTS_HEIGHT = 600
 
 # 1. Adjusted log regressions chart
 @st.cache_resource
@@ -141,7 +142,7 @@ def generate_plot_log_regression(df):
         )
         .properties(
             width="container",
-            height=480,
+            height=CHARTS_HEIGHT,
             padding={"top": 30, "bottom": 10, "left": 10, "right": 10},
             title=alt.TitleParams(
                 text="Bitcoin Adjusted Logarithmic Regressions",
@@ -269,7 +270,7 @@ def plot_log_regression_rainbow_btc(data_raw):
         )
         .properties(
             width="container",
-            height=480,
+            height=CHARTS_HEIGHT,
             padding={"top": 30, "bottom": 10, "left": 10, "right": 10},
             title=alt.TitleParams(
                 text="Bitcoin Logarithm Regression Rainbows",
@@ -376,7 +377,7 @@ def plot_log_regression_btc_diff(data_raw):
     )
 
     top_chart = alt.layer(base_price, fit_segment, log_reg_line).properties(
-        width="container", height=320
+        width="container", height=220
     )
 
     ratio_line = (

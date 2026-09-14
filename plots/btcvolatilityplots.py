@@ -35,14 +35,14 @@ def plot_btc_volatility(df_raw, period = 30):
         "legend:N",
         scale=alt.Scale(domain=legend_domain, range=legend_range),
         legend=alt.Legend(
-            title="Model Traces",
-            orient="top-left",
-            fillColor="#0e1117",
-            strokeColor="#333333",
-            padding=8,
-            cornerRadius=5,
+            title=None,  # Título removido para economizar espaço em telas pequenas
+            orient="bottom",  # Move a legenda para baixo do gráfico
+            direction="horizontal",
+            columns=2,  # Permite distribuição limpa no mobile
             labelColor="#cccccc",
-            titleColor="#ffffff",
+            labelFontSize=11,
+            columnPadding=15,
+            padding=10,
         ),
     )
 
@@ -200,14 +200,14 @@ def plot_btc_volatility_bands(
         "legend:N",
         scale=alt.Scale(domain=legend_domain, range=legend_range),
         legend=alt.Legend(
-            title="Model Traces",
-            orient="top-left",
-            fillColor="#0e1117",
-            strokeColor="#333333",
-            padding=8,
-            cornerRadius=5,
+            title=None,  # Título removido para economizar espaço em telas pequenas
+            orient="bottom",  # Move a legenda para baixo do gráfico
+            direction="horizontal",
+            columns=2,  # Permite distribuição limpa no mobile
             labelColor="#cccccc",
-            titleColor="#ffffff",
+            labelFontSize=11,
+            columnPadding=15,
+            padding=10,
         ),
     )
 

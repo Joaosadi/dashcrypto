@@ -13,7 +13,6 @@
 
 - Restyle stablecoin supply chart to match market share chart
 - Match macro metrics charts to BTC tab styling
-- Move macro chart legends to the right to avoid overlap
 - Make app layout responsive on mobile phones
 - Use container-width charts for responsive sizing
 

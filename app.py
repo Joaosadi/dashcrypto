@@ -95,7 +95,7 @@ with tab1:
     with col2:
         st.altair_chart(btcvol.plot_rvi(df), use_container_width=True)
 
-    st.altair_chart(btcvol.plot_btc_volatility_bands(df), use_container_width=True)
+    # st.altair_chart(btcvol.plot_btc_volatility_bands(df), use_container_width=True) removed due to bad chart
 
 with tab2:
     df_stables = stbl.get_stablecoin_circulating_data()
@@ -163,7 +163,7 @@ with tab3:
 st.markdown(
     """
     <div class="custom-footer">
-        <span>Analytics Dashboard • Built with Streamlit & Altair • v0.0.1</span>
+        <span>Analytics Dashboard • Built with Streamlit & Altair • v0.2.0</span>
     </div>
     """,
     unsafe_allow_html=True,

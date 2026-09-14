@@ -29,18 +29,19 @@ def n_year_returns(data_raw, n):
     legend_domain = ["BTC Price", f"{n}-Year Return (log10)"]
     legend_range = ["#7FFFD4", "#0000FF"]  # Aquamarine & Blue
 
+    # Legenda ajustada para mobile (inferior, horizontal e com quebra de colunas)
     color_scale = alt.Color(
         "legend:N",
         scale=alt.Scale(domain=legend_domain, range=legend_range),
         legend=alt.Legend(
-            title="Model Traces",
-            orient="top-left",
-            fillColor="#0e1117",
-            strokeColor="#333333",
-            padding=8,
-            cornerRadius=5,
+            title=None,  # Título removido para economizar espaço em telas pequenas
+            orient="bottom",  # Move a legenda para baixo do gráfico
+            direction="horizontal",
+            columns=2,  # Permite distribuição limpa no mobile
             labelColor="#cccccc",
-            titleColor="#ffffff",
+            labelFontSize=11,
+            columnPadding=15,
+            padding=10,
         ),
     )
 
@@ -53,7 +54,10 @@ def n_year_returns(data_raw, n):
                 "time_close:T",
                 title=None,
                 axis=alt.Axis(
-                    gridColor="#222222", labelColor="#cccccc", labels=False
+                    gridColor="#222222",
+                    labelColor="#cccccc",
+                    labels=False,
+                    labelAngle=-45,
                 ),
             ),
             y=alt.Y(
@@ -69,7 +73,7 @@ def n_year_returns(data_raw, n):
             ],
         )
         .transform_calculate(legend="'BTC Price'")
-        .properties(width="container", height=380)
+        .properties(width="container", height=280)
     )
 
     # 2. Bottom Chart - Returns
@@ -80,11 +84,13 @@ def n_year_returns(data_raw, n):
             x=alt.X(
                 "time_close:T",
                 title="Date",
-                axis=alt.Axis(gridColor="#222222", labelColor="#cccccc"),
+                axis=alt.Axis(
+                    gridColor="#222222", labelColor="#cccccc", labelAngle=-45
+                ),
             ),
             y=alt.Y(
                 "returns:Q",
-                title=f"{n}-Yr Log10 Return",
+                title=f"{n}-Yr Log Return",
                 axis=alt.Axis(gridColor="#442222", labelColor="#cccccc"),
             ),
             color=color_scale,
@@ -102,16 +108,17 @@ def n_year_returns(data_raw, n):
     # 3. Concatenate vertically
     combined_chart = (
         alt.vconcat(top_chart, bottom_chart)
-        .resolve_scale(x="shared")
+        .resolve_scale(x="shared", color="shared")
         .properties(
             title=alt.TitleParams(
                 text=f"Bitcoin {n}-Year Log10 Returns",
                 color="white",
-                fontSize=18,
+                fontSize=16,
                 anchor="start",
+                limit=280,  # Evita que o título ultrapasse a largura no mobile
             ),
             background="#0e1117",
-            bounds="full",
+            padding={"top": 15, "bottom": 15, "left": 10, "right": 10},
         )
         .configure_view(strokeWidth=0)
     )
@@ -151,14 +158,14 @@ def plot_returns_t_distribution(df_raw):
             range=["#7FFFD4", "#3F51B5", "#FF4500"],  # Aquamarine, Gold, Orange-Red
         ),
         legend=alt.Legend(
-            title="Model Traces",
-            orient="top-right",
-            fillColor="#0e1117",
-            strokeColor="#333333",
-            padding=8,
-            cornerRadius=5,
+            title=None,  # Título removido para economizar espaço em telas pequenas
+            orient="bottom",  # Move a legenda para baixo do gráfico
+            direction="horizontal",
+            columns=2,  # Permite distribuição limpa no mobile
             labelColor="#cccccc",
-            titleColor="#ffffff",
+            labelFontSize=11,
+            columnPadding=15,
+            padding=10,
         ),
     )
 
@@ -230,7 +237,7 @@ def plot_returns_t_distribution(df_raw):
         .resolve_scale(y="independent")
         .properties(
             width="container",
-            height=480,
+            height=600,
             title=alt.TitleParams(
                 text="Bitcoin Daily Returns Distribution with 95% Confidence Interval",
                 subtitle=(
