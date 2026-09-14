@@ -142,7 +142,7 @@ def create_indicator_chart(df, col, meta=None):
     date_col = "index" if "index" in data.columns else "date"
     data[date_col] = pd.to_datetime(data[date_col])
 
-    # 0. Master Legend Scale (Posicionada na parte inferior para economizar espaço horizontal)
+    # 0. Master Legend Scale (positioned at the bottom to save horizontal space)
     color_scale = alt.Color(
         "legend:N",
         scale=alt.Scale(
@@ -151,7 +151,7 @@ def create_indicator_chart(df, col, meta=None):
         ),
         legend=alt.Legend(
             title=None,
-            orient="bottom",  # Move a legenda para baixo
+            orient="bottom",  # Moves the legend to the bottom
             direction="horizontal",
             fillColor="#0e1117",
             strokeColor="#333333",
@@ -166,12 +166,12 @@ def create_indicator_chart(df, col, meta=None):
     base = alt.Chart(data).encode(
         x=alt.X(
             f"{date_col}:T",
-            title=None,  # Remove o título "Date" para poupar espaço vertical
+            title=None,  # Remove the "Date" title to save vertical space
             axis=alt.Axis(
                 format="%Y-%m",
                 gridColor="#222222",
                 labelColor="#cccccc",
-                labelAngle=-45,  # Inclina os rótulos de data no mobile
+                labelAngle=-45,  # Tilts the date labels on mobile
                 labelFontSize=10,
             ),
         )
@@ -204,7 +204,7 @@ def create_indicator_chart(df, col, meta=None):
     ).encode(
         y=alt.Y(
             "btc_close:Q",
-            title="BTC (Log)",  # Encurtado para caber em telas pequenas
+            title="BTC (Log)",  # Shortened to fit on small screens
             scale=alt.Scale(type="log"),
             axis=alt.Axis(
                 titleColor="#7FFFD4",
@@ -233,18 +233,18 @@ def create_indicator_chart(df, col, meta=None):
     else:
         combined = alt.layer(macro_line, btc_line)
 
-    # 5. Configuração de Responsividade e Títulos
+    # 5. Responsive Configuration and Titles
     chart = (
         combined.resolve_scale(y="independent")
         .properties(
-            width="container",  # Permite que o Altair se expanda no container do Streamlit
-            height=450,        # Altura ligeiramente reduzida para caber na tela do celular
+            width="container",  # Allows Altair to expand within the Streamlit container
+            height=450,        # Height slightly reduced to fit phone screens
             title=alt.TitleParams(
-                text=f"{meta['legend']} vs BTC", # Título curto
+                text=f"{meta['legend']} vs BTC", # Short title
                 subtitle=[
                     f"Eixo Esq: {meta['ylabel']}", 
                     "Eixo Dir: BTC (Escala Log)"
-                ], # Subtítulo em lista (duas linhas) evita quebra/corte horizontal
+                ], # List subtitle (two lines) avoids horizontal wrapping/clipping
                 color="white",
                 subtitleColor="#aaaaaa",
                 fontSize=14,

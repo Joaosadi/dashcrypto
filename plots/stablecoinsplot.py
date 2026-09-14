@@ -66,17 +66,17 @@ def plot_stablecoins_market_dominance(df, nstables=6):
             legend=alt.Legend(
                     orient="bottom",
                     direction="horizontal",
-                    columns=4,           # Quebra os itens em no máximo 4 colunas por linha
-                    symbolLimit=10,      # Garante a exibição de todos os itens
+                    columns=4,           # Wraps items into at most 4 columns per row
+                    symbolLimit=10,      # Ensures all items are displayed
                     labelColor="#FFFFFF",
                     labelFontSize=10,
-                    padding=10           # Garante respiro entre o gráfico e a legenda
+                    padding=10           # Adds breathing room between the chart and the legend
                 ),
             sort=domain,
         ),
     )
 
-    # Reduzido o raio externo para evitar transbordo em telas pequenas
+    # Reduced outer radius to prevent overflow on small screens
     arcs = base.mark_arc(innerRadius=40, outerRadius=110).encode(
         tooltip=[
             alt.Tooltip("symbol:N", title="Stablecoin"),
@@ -87,7 +87,7 @@ def plot_stablecoins_market_dominance(df, nstables=6):
         ]
     )
 
-    # Posicionado a label de porcentagem dentro/borda da fatia (radius=130 em vez de 180)
+    # Percentage label positioned inside/at the edge of the slice (radius=130 instead of 180)
     labels = base.mark_text(
         radius=130, color="white", fontSize=11, fontWeight="bold"
     ).encode(text=alt.Text("pct:Q", format=".1%"))
@@ -97,15 +97,15 @@ def plot_stablecoins_market_dominance(df, nstables=6):
         .properties(
             title="Top Stablecoins Market Share",
             width="container",
-            height=360,  # Ligeiro aumento para dar respiro
-            padding={"top": 30, "bottom": 10, "left": 10, "right": 10}, # Garante espaço em volta
+            height=360,  # Slightly increased for breathing room
+            padding={"top": 30, "bottom": 10, "left": 10, "right": 10}, # Adds space around the chart
             background="#0E1117",
         )
         .configure_title(
             anchor="middle",
             color="#FFFFFF",
             fontSize=15,
-            dy=10  # Empurra o título levemente para DENTRO da área visível (evita o corte no topo)
+            dy=10  # Pushes the title slightly into the visible area (prevents top clipping)
         )
         .configure_view(strokeWidth=0)
     )
@@ -239,7 +239,7 @@ def plot_stablecoin_historical_circulating(prepared_data, normalize=False):
                     gridColor="#22272E",
                     domainColor="#444C56",
                     labelColor="#ADB5BD",
-                    labelAngle=-45,  # Inclinação previne sobreposição de datas no mobile
+                    labelAngle=-45,  # Tilt prevents date label overlap on mobile
                     labelFontSize=10,
                 ),
             ),
@@ -262,7 +262,7 @@ def plot_stablecoin_historical_circulating(prepared_data, normalize=False):
                 title=None,
                 scale=alt.Scale(domain=domain, range=range_colors),
                 legend=alt.Legend(
-                    orient="bottom",  # Move legenda para baixo
+                    orient="bottom",  # Moves the legend to the bottom
                     direction="horizontal",
                     labelColor="#FFFFFF",
                     labelFontSize=11,
@@ -281,7 +281,7 @@ def plot_stablecoin_historical_circulating(prepared_data, normalize=False):
         .properties(
             title=chart_title,
             width="container",
-            height=350,  # Reduzido de 600 para 350px para caber na tela do celular
+            height=350,  # Reduced from 600 to 350px to fit phone screens
             background="#0e1117",
         )
         .configure_title(color="#FFFFFF", fontSize=15, anchor="start")
@@ -352,7 +352,7 @@ def plot_stablecoin_price_histograms(price_df, symbol="usdt"):
                     domainColor="#444C56",
                     labelColor="#ADB5BD",
                     titleColor="#FFFFFF",
-                    labelAngle=-45,  # Evita colisão nos valores de preço no mobile
+                    labelAngle=-45,  # Prevents collision of price labels on mobile
                     labelFontSize=10,
                     titleFontSize=11,
                 ),
@@ -466,11 +466,11 @@ def plot_chain_stablecoin_dominance(df):
             legend=alt.Legend(
                 orient="bottom",
                 direction="horizontal",
-                columns=4,           # Quebra os itens em no máximo 4 colunas por linha
-                symbolLimit=10,      # Garante a exibição de todos os itens
+                columns=4,           # Wraps items into at most 4 columns per row
+                symbolLimit=10,      # Ensures all items are displayed
                 labelColor="#FFFFFF",
                 labelFontSize=10,
-                padding=10           # Garante respiro entre o gráfico e a legenda
+                padding=10           # Adds breathing room between the chart and the legend
             ),
             sort=domain,
         ),
@@ -495,15 +495,15 @@ def plot_chain_stablecoin_dominance(df):
         .properties(
             title="Top Chains by Circulating Stablecoins",
             width="container",
-            height=360,  # Ligeiro aumento para dar respiro
-            padding={"top": 30, "bottom": 10, "left": 10, "right": 10}, # Garante espaço em volta
+            height=360,  # Slightly increased for breathing room
+            padding={"top": 30, "bottom": 10, "left": 10, "right": 10}, # Adds space around the chart
             background="#0E1117",
         )
         .configure_title(
             anchor="middle",
             color="#FFFFFF",
             fontSize=15,
-            dy=10  # Empurra o título levemente para DENTRO da área visível (evita o corte no topo)
+            dy=10  # Pushes the title slightly into the visible area (prevents top clipping)
         )
         .configure_view(strokeWidth=0)
     )

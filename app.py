@@ -32,7 +32,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Snapshot Metrics - 3 colunas por linha funcionam melhor que 6 espremidas
+# Snapshot Metrics - 3 columns per row work better than 6 squeezed ones
 marketsnap = mt.get_snapshot()
 macro_data = mt.fetch_global_market_metrics()
 
@@ -125,7 +125,7 @@ with tab2:
     stablenames = ["usd-coin", "dai", "tether", "usds", "usd1-wlfi", 'ethena-usde']
     stablecoinprices = stbl.get_stablecoin_prices()
 
-    # 2 colunas por linha garantem leitura sem espremer os histogramas no mobile
+    # 2 columns per row keep the histograms readable on mobile without squeezing
     for i in range(0, len(stablenames), 2):
         c1, c2 = st.columns(2)
         with c1:
@@ -150,7 +150,7 @@ with tab3:
     charts = macrop.create_all_indicator_charts(weekly)
     items = list(charts.items())
 
-    # Organiza em 2 colunas para Desktop (o CSS empilhará no celular)
+    # Arrange in 2 columns on desktop (CSS stacks them on mobile)
     for i in range(0, len(items), 2):
         col1, col2 = st.columns(2)
         with col1:

@@ -29,15 +29,15 @@ def n_year_returns(data_raw, n):
     legend_domain = ["BTC Price", f"{n}-Year Return (log10)"]
     legend_range = ["#7FFFD4", "#0000FF"]  # Aquamarine & Blue
 
-    # Legenda ajustada para mobile (inferior, horizontal e com quebra de colunas)
+    # Legend adjusted for mobile (bottom, horizontal, with column wrapping)
     color_scale = alt.Color(
         "legend:N",
         scale=alt.Scale(domain=legend_domain, range=legend_range),
         legend=alt.Legend(
-            title=None,  # Título removido para economizar espaço em telas pequenas
-            orient="bottom",  # Move a legenda para baixo do gráfico
+            title=None,  # Title removed to save space on small screens
+            orient="bottom",  # Moves the legend to the bottom of the chart
             direction="horizontal",
-            columns=2,  # Permite distribuição limpa no mobile
+            columns=2,  # Keeps the layout clean on mobile
             labelColor="#cccccc",
             labelFontSize=11,
             columnPadding=15,
@@ -115,7 +115,7 @@ def n_year_returns(data_raw, n):
                 color="white",
                 fontSize=16,
                 anchor="start",
-                limit=280,  # Evita que o título ultrapasse a largura no mobile
+                limit=280,  # Prevents the title from overflowing on mobile
             ),
             background="#0e1117",
             padding={"top": 15, "bottom": 15, "left": 10, "right": 10},
@@ -158,10 +158,10 @@ def plot_returns_t_distribution(df_raw):
             range=["#7FFFD4", "#3F51B5", "#FF4500"],  # Aquamarine, Gold, Orange-Red
         ),
         legend=alt.Legend(
-            title=None,  # Título removido para economizar espaço em telas pequenas
-            orient="bottom",  # Move a legenda para baixo do gráfico
+            title=None,  # Title removed to save space on small screens
+            orient="bottom",  # Moves the legend to the bottom of the chart
             direction="horizontal",
-            columns=2,  # Permite distribuição limpa no mobile
+            columns=2,  # Keeps the layout clean on mobile
             labelColor="#cccccc",
             labelFontSize=11,
             columnPadding=15,
