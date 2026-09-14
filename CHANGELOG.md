@@ -1,4 +1,13 @@
+## [unreleased]
+
+### Refactor
+
+- Move notebooks to notebooks/ and fix relative data paths
 ## [0.2.0] - 2026-09-14
+
+### Documentation
+
+- Add project README
 
 ### Performance
 
@@ -9,6 +18,7 @@
 
 - Made major changes to all charts to make them more responsive, especially on phones
 - Made even more changes to charts so they look better in mobile and pc
+- Translate code comments to English
 
 ### Styling
 
