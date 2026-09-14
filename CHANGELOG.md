@@ -1,4 +1,4 @@
-## [unreleased]
+## [0.2.0] - 2026-09-14
 
 ### Performance
 
@@ -8,11 +8,13 @@
 ### Refactor
 
 - Made major changes to all charts to make them more responsive, especially on phones
+- Made even more changes to charts so they look better in mobile and pc
 
 ### Styling
 
 - Restyle stablecoin supply chart to match market share chart
 - Match macro metrics charts to BTC tab styling
+- Move macro chart legends to the right to avoid overlap
 - Make app layout responsive on mobile phones
 - Use container-width charts for responsive sizing
 
